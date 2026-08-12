@@ -72,7 +72,15 @@ export function TopologyMap({
   );
 
   return (
-    <div className={cx("relative w-full", className)}>
+    // `overflow-hidden` is a guarantee, not decoration: nodes are placed by
+    // percentage and centred with -translate-x-1/2, so the node at x=96 extends
+    // half a label past the container. Without this, a narrow viewport lets that
+    // spill escape the panel and push the whole page into horizontal scroll —
+    // invisible on a desktop, immediately obvious on a phone.
+    <div className={cx("relative w-full overflow-hidden", className)}>
+      {/* Both layers are inset together so edge nodes stay fully visible
+          rather than being clipped, and the lines still meet the nodes. */}
+      <div className="absolute inset-y-0 left-[8%] right-[8%]">
       {/* Edge layer */}
       <svg
         className="absolute inset-0 h-full w-full"
@@ -158,6 +166,7 @@ export function TopologyMap({
           );
         })}
       </ul>
+      </div>
     </div>
   );
 }

@@ -17,9 +17,20 @@ import type { NextConfig } from "next";
  * 'self'` and `object-src 'none'` directives are the ones doing real work here:
  * even if a script were somehow injected, it could not exfiltrate anywhere.
  */
+/**
+ * React uses `eval()` in development for debugging features such as
+ * reconstructing callstacks across environments, and refuses to start those
+ * features without it. It never uses `eval()` in production.
+ *
+ * So `'unsafe-eval'` is granted in development only. Relaxing it everywhere to
+ * quieten a dev warning would weaken the deployed policy for no benefit, and
+ * omitting it everywhere degrades the debugging experience for no security gain.
+ */
+const DEV_ONLY_SCRIPT_SRC = process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'";
+
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${DEV_ONLY_SCRIPT_SRC}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",

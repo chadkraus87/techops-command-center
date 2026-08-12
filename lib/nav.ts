@@ -31,6 +31,14 @@ export interface NavItem {
   description: string;
   /** Single-key shortcut, pressed with the g prefix (g then o). */
   shortcut?: string;
+  /**
+   * Extra search terms for the command palette.
+   *
+   * A label and a description are what the page is *called*; these are what
+   * people actually type. Searching "topology" should find Infrastructure and
+   * "ping" should find Network, even though neither word appears in the name.
+   */
+  aliases?: string;
 }
 
 export interface NavGroup {
@@ -47,6 +55,7 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Overview",
         icon: LayoutGrid,
         description: "Global system status, key metrics and live activity",
+        aliases: "home dashboard command center status summary",
         shortcut: "o",
       },
       {
@@ -54,6 +63,7 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Infrastructure",
         icon: Waypoints,
         description: "Service dependency map and failure blast radius",
+        aliases: "topology map graph dependencies nodes blast radius architecture diagram",
         shortcut: "i",
       },
       {
@@ -61,6 +71,7 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Services",
         icon: Server,
         description: "Service catalogue with ownership, SLOs and health",
+        aliases: "catalogue catalog inventory hosts owners slo teams",
         shortcut: "s",
       },
       {
@@ -68,6 +79,7 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Metrics",
         icon: Gauge,
         description: "Observability dashboard across every metric channel",
+        aliases: "charts graphs observability cpu memory latency throughput telemetry",
         shortcut: "m",
       },
       {
@@ -75,6 +87,7 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "API Monitor",
         icon: Activity,
         description: "Endpoint latency percentiles, error rates and samples",
+        aliases: "endpoints routes percentiles p95 p99 requests http rest",
         shortcut: "a",
       },
     ],
@@ -87,6 +100,7 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Incidents",
         icon: Siren,
         description: "Active and historic incidents with full timelines",
+        aliases: "outages postmortem post-mortem timeline history sev root cause",
         shortcut: "n",
       },
       {
@@ -94,6 +108,7 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Alerts",
         icon: AlertTriangle,
         description: "Firing alerts, thresholds and acknowledgement",
+        aliases: "alarms warnings thresholds firing paging notifications",
         shortcut: "r",
       },
       {
@@ -101,6 +116,7 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Logs",
         icon: ScrollText,
         description: "Live log stream with filtering and structured metadata",
+        aliases: "stream tail grep search errors stdout syslog",
         shortcut: "l",
       },
       {
@@ -108,6 +124,7 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Network",
         icon: Network,
         description: "Network topology and simulated diagnostic tools",
+        aliases: "terminal console ping dig traceroute curl dns packet loss shell",
         shortcut: "k",
       },
       {
@@ -115,6 +132,7 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Support Queue",
         icon: LifeBuoy,
         description: "Customer tickets arriving from the incident",
+        aliases: "tickets customers helpdesk queue complaints inbox",
         shortcut: "q",
       },
     ],
@@ -127,6 +145,7 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "QA Lab",
         icon: FlaskConical,
         description: "Deployments, test results, feature flags and known bugs",
+        aliases: "deployments releases tests feature flags bugs ci pipeline",
         shortcut: "t",
       },
       {
@@ -134,6 +153,7 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Simulation",
         icon: Radio,
         description: "Trigger an incident and run the investigation workflow",
+        aliases: "trigger incident scenario start break outage practice",
         shortcut: "x",
       },
       {
@@ -141,6 +161,7 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "About Project",
         icon: BookOpen,
         description: "How this was built — architecture and engineering notes",
+        aliases: "readme docs architecture author stack how it works",
         shortcut: "b",
       },
     ],

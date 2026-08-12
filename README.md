@@ -13,17 +13,46 @@ No account. No backend. No paid services. Open it and start clicking.
 
 ---
 
+**[▶ Try it live](https://techops-command-center.vercel.app/)** — no sign-up, no install. The
+environment is already running.
+
+---
+
 ## Screenshots
 
-<!-- Replace these placeholders with captures once deployed. -->
+### Command Center
+Global status, live charts and a per-service health strip. Everything on this screen is
+computed from one metric layer, so no two panels can disagree.
 
-| View | Description |
-| --- | --- |
-| `docs/screenshots/overview.png` | Command Center — global status, live charts, service health strip |
-| `docs/screenshots/topology.png` | Dependency map mid-incident, showing the failure blast radius |
-| `docs/screenshots/simulation.png` | Investigation workflow — evidence, diagnosis, remediation |
-| `docs/screenshots/report.png` | Post-incident report with scoring breakdown and post-mortem |
-| `docs/screenshots/network.png` | Network Center with the simulated diagnostics terminal |
+![Command Center overview](docs/screenshots/overview.jpg)
+
+### Infrastructure topology, mid-incident
+A DNS failure in progress. Nine services are red — but Redis, Postgres and the message
+queue are provably **green**, and that contradiction is what solves the scenario.
+
+![Dependency map during an incident](docs/screenshots/topology.jpg)
+
+### Investigation workflow
+Gather evidence, commit to a root cause, then remediate. A wrong diagnosis returns
+scenario-specific coaching pointing at the evidence that rules it out.
+
+![Investigation workflow](docs/screenshots/simulation.jpg)
+
+### Network diagnostics
+`ping` by hostname fails, `dig` returns SERVFAIL, but `ping` by IP succeeds — the hosts are
+up, name resolution is not. Every command is answered from in-memory state.
+
+![Simulated network terminal](docs/screenshots/network.jpg)
+
+### Post-incident report
+Scored on accuracy, speed, thoroughness and restraint, with the full post-mortem and the
+evidence that mattered.
+
+![Post-incident report](docs/screenshots/report.jpg)
+
+> Screenshots are captured automatically against a production build by
+> `node scripts/screenshots.mjs`, which drives a real incident end to end rather than posing
+> a healthy dashboard.
 
 ---
 
@@ -39,7 +68,8 @@ No account. No backend. No paid services. Open it and start clicking.
 - **Operations knowledge** — SLO-derived alerting with evaluation windows,
   dependency cascades, tail-latency behaviour under saturation, and incident
   management workflow
-- **Testing** — 86 unit tests over a pure, deterministic simulation engine
+- **Testing** — 105 unit tests over a pure, deterministic simulation engine, plus
+  15 Playwright end-to-end tests across desktop and mobile
 
 ---
 
@@ -108,7 +138,8 @@ No account. No backend. No paid services. Open it and start clicking.
 | Charts | Recharts | Time-series and percentiles |
 | Icons | Lucide | |
 | Fonts | Geist (self-hosted) | No third-party request, no network dependency at build |
-| Tests | Vitest | Fast, and the engine is pure so tests need no DOM |
+| Unit tests | Vitest | Fast, and the engine is pure so tests need no DOM |
+| E2E tests | Playwright | Desktop journeys plus a mobile responsive suite |
 
 ---
 
@@ -295,14 +326,37 @@ Open <http://localhost:3000>.
 ### Testing
 
 ```bash
-npm test           # run the suite once
+npm test           # 105 unit tests over the simulation engine
 npm run test:watch # watch mode
+npm run test:e2e   # 15 Playwright tests against a production build
 ```
 
-86 tests covering incident state transitions, metric ramp and recovery curves,
-service health derivation, dependency cascade attenuation, alert evaluation
-windows, diagnosis and scoring, remediation gating, the network tools, and the
-determinism guarantee itself.
+**Unit tests (Vitest, 105)** cover incident state transitions, metric ramp and
+recovery curves, service health derivation, dependency cascade attenuation, alert
+evaluation windows, diagnosis and scoring, remediation gating, session
+persistence, the network tools, and the determinism guarantee itself.
+
+**End-to-end tests (Playwright, 15)** deliberately do *not* re-assert simulation
+behaviour — the unit tests own that. They cover the one thing unit tests cannot:
+that a person can actually work an incident in a browser. They run against a
+production build, because dev-only React behaviour has masked real bugs here
+before.
+
+- `desktop` — full journeys: trigger → investigate → diagnose → remediate →
+  score, session restore across a reload, the network terminal's diagnostic
+  contradiction, and a console-error sweep across every route
+- `mobile` — what genuinely differs on a phone: the nav drawer, restacked tables,
+  and an assertion that **no route scrolls horizontally**, which has caught two
+  real layout bugs that were invisible on desktop
+
+### Screenshots
+
+```bash
+npm run screenshots        # against localhost:3000
+npm run screenshots -- https://your-deployment.vercel.app
+```
+
+Drives a real incident end to end and captures each view mid-failure.
 
 ### Type checking and linting
 
@@ -384,7 +438,9 @@ lib/
   format.ts                Formatting and status vocabulary
   nav.ts                   Navigation model
 
-tests/                     Vitest suites
+tests/                     Vitest unit suites
+  e2e/                     Playwright specs (desktop journeys + mobile)
+scripts/screenshots.mjs    Captures README screenshots from a real incident
 ```
 
 ---

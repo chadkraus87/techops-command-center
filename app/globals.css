@@ -158,6 +158,16 @@ body::before {
     inset 0 1px 0 0 rgba(255, 255, 255, 0.035),
     0 1px 2px rgba(0, 0, 0, 0.4),
     0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  /*
+    Panels are almost always grid or flex children, and both default to
+    `min-width: auto` — meaning the track sizes to the panel's min-content
+    instead of the available space. A single nowrap element deep inside (a
+    truncated log line, a timestamp) then widens the whole column and pushes the
+    page into horizontal scroll, which is invisible on a desktop and obvious on
+    a phone. Setting this once here fixes the entire class of bug rather than
+    patching each layout that hits it.
+  */
+  min-width: 0;
 }
 
 .panel-flush {
@@ -165,6 +175,7 @@ body::before {
   border: 1px solid var(--color-line);
   border-radius: var(--radius-panel);
   box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
+  min-width: 0;
 }
 
 /* ============================================================================

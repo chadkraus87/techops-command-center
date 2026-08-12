@@ -49,7 +49,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       label: item.label,
       description: item.description,
       group: "Navigate",
-      keywords: `${item.label} ${item.description}`,
+      keywords: `${item.label} ${item.description} ${item.aliases ?? ""}`,
       run: () => router.push(item.href),
     }));
 
