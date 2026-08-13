@@ -174,3 +174,27 @@ export function navItemFor(pathname: string): NavItem | undefined {
   if (pathname === "/") return ALL_NAV_ITEMS.find((i) => i.href === "/");
   return ALL_NAV_ITEMS.filter((i) => i.href !== "/").find((i) => pathname.startsWith(i.href));
 }
+
+/**
+ * Routes that exist but are not navigation destinations — you arrive at them
+ * from a link, not from the sidebar.
+ */
+const STANDALONE_ROUTES: Record<string, string> = {
+  "/result": "Shared Result",
+};
+
+/**
+ * The title shown in the top bar. Falling back to "Overview" for an unknown
+ * route would actively mislabel the page the visitor is looking at, which
+ * matters most for exactly the routes people arrive at from a shared link.
+ */
+export function pageTitleFor(pathname: string): string {
+  const item = navItemFor(pathname);
+  if (item) return item.label;
+  return STANDALONE_ROUTES[pathname] ?? "TechOps Command Center";
+}
+
+/** True where the first-visit dialog would get in the way rather than help. */
+export function suppressesOnboarding(pathname: string): boolean {
+  return pathname in STANDALONE_ROUTES;
+}

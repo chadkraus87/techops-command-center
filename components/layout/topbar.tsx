@@ -13,7 +13,7 @@ import {
   Zap,
 } from "lucide-react";
 import { cx, formatTime, STATUS_TEXT_CLASS } from "@/lib/format";
-import { navItemFor } from "@/lib/nav";
+import { pageTitleFor } from "@/lib/nav";
 import { summariseFleet } from "@/lib/sim/metrics";
 import { useSimStore } from "@/lib/store/sim-store";
 import { Beacon, Button, ToggleGroup, Tooltip } from "@/components/ui/primitives";
@@ -71,7 +71,7 @@ export function Topbar({
 
   const fleet = summariseFleet(services);
   const copy = STATUS_COPY[fleet.status];
-  const current = navItemFor(pathname);
+  const pageTitle = pageTitleFor(pathname);
 
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface-2/85 px-3 backdrop-blur-md sm:px-4">
@@ -87,7 +87,7 @@ export function Topbar({
       {/* Page identity + global status */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <h1 className="hidden shrink-0 text-[13px] font-semibold tracking-tight text-ink sm:block">
-          {current?.label ?? "Overview"}
+          {pageTitle}
         </h1>
 
         <div

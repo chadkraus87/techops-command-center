@@ -32,7 +32,8 @@ const STACK = [
   { name: "Tailwind CSS v4", detail: "CSS-first theme with design tokens in @theme" },
   { name: "Zustand", detail: "Single store, narrow selectors to control re-renders" },
   { name: "Recharts", detail: "Time-series and percentile charts" },
-  { name: "Vitest", detail: "Unit tests over the simulation engine" },
+  { name: "Vitest", detail: "131 unit tests over the simulation engine" },
+  { name: "Playwright", detail: "19 end-to-end tests, desktop and mobile, run in CI" },
   { name: "Lucide", detail: "Icon set" },
 ];
 
@@ -129,7 +130,9 @@ export default function AboutPage() {
           </p>
           <p className="text-ink-3">
             There is no authentication, no backend and no paid service. Everything runs client-side;
-            preferences and personal bests are stored in localStorage.
+            preferences and personal bests are stored in localStorage, an in-progress incident
+            survives a reload via sessionStorage, and a finished run can be shared by encoding it
+            into the URL — still with nothing stored on a server.
           </p>
         </div>
       </Panel>
@@ -207,16 +210,24 @@ export default function AboutPage() {
         <PanelHeader title="Testing strategy" />
         <div className="space-y-3 p-5 text-[12.5px] leading-relaxed text-ink-2">
           <p>
-            Tests target the simulation engine rather than the interface, because that is where the
-            behaviour that matters lives — and because a pure engine is cheap to test exhaustively.
-            The suite covers incident state transitions, metric ramp and recovery curves, service
-            health derivation, dependency cascade attenuation, alert evaluation windows, diagnosis
-            scoring, remediation gating, and the determinism guarantee itself.
+            131 unit tests target the simulation engine rather than the interface, because that is
+            where the behaviour that matters lives — and because a pure engine is cheap to test
+            exhaustively. They cover incident state transitions, metric ramp and recovery curves,
+            service health derivation, dependency cascade attenuation, alert evaluation windows,
+            diagnosis scoring, remediation gating, session persistence, shared-link encoding, and
+            the determinism guarantee itself.
           </p>
           <p className="text-ink-3">
             The determinism test is the load-bearing one: it runs the same scenario twice from a
             fresh state and asserts the two runs produce byte-identical telemetry. If that passes,
             every other test is reproducible; if it fails, none of them mean anything.
+          </p>
+          <p>
+            On top of that, 19 Playwright tests cover the one thing unit tests cannot: that a person
+            can actually work an incident in a browser. They run against a production build, split
+            into desktop journeys and a mobile suite whose horizontal-overflow assertion has already
+            caught two real layout regressions that were invisible on a desktop. Everything runs in
+            CI on every push.
           </p>
         </div>
       </Panel>

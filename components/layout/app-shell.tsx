@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
-import { ALL_NAV_ITEMS } from "@/lib/nav";
+import { usePathname, useRouter } from "next/navigation";
+import { ALL_NAV_ITEMS, suppressesOnboarding } from "@/lib/nav";
 import { usePreferences } from "@/lib/store/prefs";
 import { useSimStore } from "@/lib/store/sim-store";
 import { CommandPalette } from "./command-palette";
@@ -36,6 +36,7 @@ const PERSIST_INTERVAL_MS = 5000;
 
 export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
 
@@ -213,7 +214,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       {paletteOpen ? <CommandPalette onClose={closePalette} /> : null}
       <ToastViewport />
 
-      {loaded && !prefs.onboardingDismissed ? (
+      {/* A shared result link exists to show that result. Opening a generic
+          welcome dialog on top of it buries the thing the visitor came for. */}
+      {loaded && !prefs.onboardingDismissed && !suppressesOnboarding(pathname) ? (
         <Onboarding onDismiss={() => update({ onboardingDismissed: true })} />
       ) : null}
     </div>

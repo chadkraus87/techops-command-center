@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { Award, RotateCcw } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Award, Check, Link2, RotateCcw } from "lucide-react";
 import { cx, formatDuration } from "@/lib/format";
 import { getScenario } from "@/lib/sim/scenarios";
 import { labelForAction, RANKS, scoreIncident } from "@/lib/sim/scoring";
+import { buildShareUrl } from "@/lib/sim/share";
 import { usePreferences } from "@/lib/store/prefs";
 import { useSimStore } from "@/lib/store/sim-store";
 import { Button, Meter, Panel, SectionLabel } from "@/components/ui/primitives";
-import type { Incident } from "@/lib/sim/types";
+import type { Incident, ScoreBreakdown } from "@/lib/sim/types";
 
 /**
  * Post-incident report.
@@ -190,16 +191,71 @@ export function ScoreReport({ incident }: { incident: Incident }) {
         </div>
       </Panel>
 
-      <Button
-        variant="primary"
-        size="lg"
-        icon={<RotateCcw size={14} />}
-        onClick={clearScenario}
-        className="w-full"
-      >
-        Run another scenario
-      </Button>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <ShareResult incident={incident} score={score} />
+        <Button
+          variant="primary"
+          size="lg"
+          icon={<RotateCcw size={14} />}
+          onClick={clearScenario}
+          className="flex-1"
+        >
+          Run another scenario
+        </Button>
+      </div>
     </div>
+  );
+}
+
+/**
+ * Copy a link to this run.
+ *
+ * The whole result lives in the URL, so there is nothing to store and no
+ * account involved. Falls back to a selectable input where the clipboard API is
+ * unavailable — an insecure context, or a browser that refuses the permission.
+ */
+function ShareResult({ incident, score }: { incident: Incident; score: ScoreBreakdown }) {
+  const [copied, setCopied] = useState(false);
+  const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
+
+  const share = useCallback(async () => {
+    const url = buildShareUrl(incident, score, window.location.origin);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2500);
+    } catch {
+      setFallbackUrl(url);
+    }
+  }, [incident, score]);
+
+  if (fallbackUrl) {
+    return (
+      <div className="flex-1">
+        <label htmlFor="share-url" className="mb-1 block text-[11px] text-ink-3">
+          Copy this link to share your result
+        </label>
+        <input
+          id="share-url"
+          readOnly
+          value={fallbackUrl}
+          onFocus={(event) => event.currentTarget.select()}
+          className="w-full rounded-md border border-line bg-surface px-2.5 py-2 font-mono text-[11px] text-ink outline-none"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <Button
+      variant="secondary"
+      size="lg"
+      icon={copied ? <Check size={14} /> : <Link2 size={14} />}
+      onClick={share}
+      className="flex-1"
+    >
+      {copied ? "Link copied" : "Share result"}
+    </Button>
   );
 }
 

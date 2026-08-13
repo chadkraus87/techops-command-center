@@ -6,6 +6,8 @@ across logs, metrics, topology and network diagnostics, commit to a root-cause
 diagnosis, apply remediation, and restore service — scored on accuracy, speed,
 thoroughness and restraint.
 
+[![CI](https://github.com/chadkraus87/techops-command-center/actions/workflows/ci.yml/badge.svg)](https://github.com/chadkraus87/techops-command-center/actions/workflows/ci.yml)
+
 No account. No backend. No paid services. Open it and start clicking.
 
 > **Meridian Cloud is fictional.** Every service, metric, log line, customer and
@@ -102,6 +104,11 @@ evidence that mattered.
 - **QA Lab** — deployment history, test suites, feature flags, known defects, and
   a risky deployment that succeeds and then destabilises production minutes later
 
+### Sharing
+- **Shareable results** — a finished run encodes into the URL, so it can be sent
+  to someone with no account and nothing stored server-side. Arriving from a
+  shared link is one click from running the same scenario yourself.
+
 ### Session handling
 - **Reload-safe** — an incident you are three minutes into investigating survives
   a page refresh, including its timeline, evidence trail and diagnosis attempts
@@ -123,7 +130,7 @@ evidence that mattered.
 | CDN Regional Outage | SEV-2 | Intermediate | Failures are geographic, not functional. Origin is perfectly healthy. |
 | Expired TLS Certificate | SEV-1 | Starter | Instant, total, and *clean*: errors go vertical while latency falls. |
 | Network Packet Loss | SEV-2 | Advanced | Bimodal latency — fast p50, catastrophic p99. Only the network tools reveal it. |
-| Third-Party Payment Outage | SEV-3 | Starter | Nothing you own is broken. The right response is to fail over, not to fix. |
+| Third-Party Payment Provider Outage | SEV-3 | Starter | Nothing you own is broken. The right response is to fail over, not to fix. |
 
 ---
 
@@ -406,6 +413,7 @@ app/                       Routes (one directory per section)
   network/                 Network center + terminal
   support/                 Support queue
   qa-lab/                  Deployments, tests, flags, bugs
+  result/                  Read-only view of a shared run
   simulation/              Scenario picker, investigation, score report
   about/                   Portfolio write-up
 
@@ -432,6 +440,7 @@ lib/
     network.ts             Simulated diagnostics
     api.ts                 Endpoint statistics
     scoring.ts             Incident scoring
+    share.ts               Encode/decode a run into a shareable link
     history.ts             Chart series construction
     random.ts              Seeded, deterministic randomness
   store/                   Zustand store and localStorage preferences
@@ -441,6 +450,7 @@ lib/
 tests/                     Vitest unit suites
   e2e/                     Playwright specs (desktop journeys + mobile)
 scripts/screenshots.mjs    Captures README screenshots from a real incident
+.github/workflows/ci.yml   Types, lint, unit tests, build, and E2E on every push
 ```
 
 ---
@@ -478,7 +488,6 @@ scripts/screenshots.mjs    Captures README screenshots from a real incident
 
 - Multi-stage incidents where a second failure emerges during recovery
 - A scenario editor so visitors can compose their own incidents
-- Shareable post-incident report links (encoded in the URL, still no backend)
 - Runbook authoring with step-by-step guided remediation
 - An on-call rotation and paging simulation
 - Replay mode — scrub back through an incident's timeline

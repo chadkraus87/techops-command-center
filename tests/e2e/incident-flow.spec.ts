@@ -151,6 +151,66 @@ test.describe("working an incident", () => {
   });
 });
 
+test.describe("sharing a result", () => {
+  test("a finished run produces a link that renders for someone else", async ({
+    page,
+    context,
+  }) => {
+    // The share button writes to the clipboard, which needs explicit permission.
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+
+    await startScenario(page, "Third-Party Payment Provider Outage");
+    await page.getByRole("radio", { name: /Third-party provider outage/i }).click();
+    await page.getByRole("button", { name: "Submit diagnosis" }).click();
+    await page.getByRole("button", { name: /Fail over to the secondary payment provider/i }).click();
+    await expect(page.getByText("Incident resolved", { exact: true })).toBeVisible({
+      timeout: 90_000,
+    });
+
+    const score = await page.getByText("/100").first().textContent();
+
+    await page.getByRole("button", { name: /Share result/i }).click();
+    await expect(page.getByRole("button", { name: /Link copied/i })).toBeVisible();
+
+    const shareUrl = await page.evaluate(() => navigator.clipboard.readText());
+    expect(shareUrl).toContain("/result?r=");
+
+    // Arrive as a stranger would: the result must render from the URL alone.
+    await page.goto(shareUrl);
+    await expect(page.getByRole("heading", { name: "Shared Result", level: 2 })).toBeVisible();
+    await expect(page.getByText("Third-Party Payment Provider Outage").first()).toBeVisible();
+    if (score) await expect(page.getByText(score.trim()).first()).toBeVisible();
+
+    // And it must convert — one click to run the same scenario.
+    await expect(page.getByRole("link", { name: /Beat this score|Go to Simulation/i })).toBeVisible();
+  });
+
+  test("a tampered link fails gracefully instead of crashing", async ({ page }) => {
+    // An unknown scenario id would throw deep in the engine if it got that far.
+    await page.goto("/result?r=" + Buffer.from("1~not-a-real-scenario~100~40~20~15~25~0~1~5~0~40~120").toString("base64url"));
+    await expect(page.getByText(/could not be read/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: /Open Simulation Center/i })).toBeVisible();
+  });
+
+  test("a missing parameter fails gracefully", async ({ page }) => {
+    await page.goto("/result");
+    await expect(page.getByText(/could not be read/i)).toBeVisible();
+  });
+
+  test("a first-time visitor sees the result, not the welcome dialog", async ({ page }) => {
+    // This is a fresh context, so onboarding would normally appear — and would
+    // bury the very thing the link exists to show.
+    const token = Buffer.from("1~redis-failure~92~40~20~15~25~8~1~4~1~52~168").toString("base64url");
+    await page.goto(`/result?r=${token}`);
+
+    await expect(page.getByRole("dialog")).toBeHidden();
+    await expect(page.getByText("92")).toBeVisible();
+    await expect(page.getByText("Incident Commander").first()).toBeVisible();
+    // And the page must not mislabel itself in the top bar.
+    await expect(page.getByRole("heading", { name: "Shared Result", level: 1 })).toBeVisible();
+  });
+});
+
 test.describe("diagnostic tools", () => {
   test("network terminal contradicts itself usefully during a DNS incident", async ({ page }) => {
     await startScenario(page, "DNS Resolution Failure");
