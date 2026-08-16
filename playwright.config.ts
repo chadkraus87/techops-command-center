@@ -53,6 +53,14 @@ export default defineConfig({
       testMatch: /responsive\.spec\.ts/,
       use: { ...devices["Pixel 7"] },
     },
+    {
+      // 700px is the band between the mobile and desktop projects, and it is
+      // where a real header collision hid: wide enough for desktop chrome to
+      // appear, too narrow to fit it.
+      name: "tablet",
+      testMatch: /responsive\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"], viewport: { width: 700, height: 900 } },
+    },
   ],
 
   webServer: {

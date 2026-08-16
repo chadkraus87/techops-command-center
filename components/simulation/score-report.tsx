@@ -127,22 +127,40 @@ export function ScoreReport({ incident }: { incident: Incident }) {
         {score.penalties > 0 ? (
           <div className="border-t border-line bg-crit/5 px-4 py-3">
             <div className="flex items-baseline justify-between gap-3">
-              <SectionLabel className="text-crit">Unnecessary actions</SectionLabel>
+              <SectionLabel className="text-crit">Deductions</SectionLabel>
               <span className="tabnum font-mono text-[13px] font-semibold text-crit">
                 −{score.penalties}
               </span>
             </div>
-            <ul className="mt-1.5 space-y-0.5">
-              {score.unnecessaryActions.map((id) => (
-                <li key={id} className="text-[11.5px] text-ink-3">
-                  · {labelForAction(incident, id)}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-1.5 text-[11px] leading-relaxed text-ink-4">
-              In production, acting on healthy systems during an incident extends the outage and
-              can create a second one.
-            </p>
+
+            {score.unnecessaryActions.length > 0 ? (
+              <>
+                <p className="mt-1.5 text-[11.5px] font-medium text-ink-2">
+                  Unnecessary actions (−{score.penalties - score.hintPenalty})
+                </p>
+                <ul className="mt-0.5 space-y-0.5">
+                  {score.unnecessaryActions.map((id) => (
+                    <li key={id} className="text-[11.5px] text-ink-3">
+                      · {labelForAction(incident, id)}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-ink-4">
+                  In production, acting on healthy systems during an incident extends the outage
+                  and can create a second one.
+                </p>
+              </>
+            ) : null}
+
+            {score.hintsRevealed > 0 ? (
+              <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+                <span className="font-medium text-ink-2">
+                  {score.hintsRevealed} hint{score.hintsRevealed === 1 ? "" : "s"} taken (−
+                  {score.hintPenalty}).
+                </span>{" "}
+                Worth it — asking for direction costs less than guessing wrong.
+              </p>
+            ) : null}
           </div>
         ) : null}
       </Panel>

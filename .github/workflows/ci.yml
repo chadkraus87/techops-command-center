@@ -52,7 +52,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: [desktop, mobile]
+        project: [desktop, mobile, tablet]
 
     steps:
       - uses: actions/checkout@v4

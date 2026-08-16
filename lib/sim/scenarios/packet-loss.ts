@@ -184,6 +184,21 @@ export const packetLoss: Scenario = {
   resolution:
     "Traffic was failed over to the redundant uplink and the faulty interface drained for hardware replacement. Retransmissions stopped immediately and the latency distribution collapsed back to a single mode. Follow-up: alert on interface error counters, not just link state.",
 
+  hints: [
+    {
+      title: "The failures are intermittent, not constant",
+      body: "Most requests still succeed. A minority hang and time out, and retrying usually works. A saturated or broken component fails consistently; this does not.",
+    },
+    {
+      title: "Compare typical against worst-case",
+      body: "On Metrics, look at median latency next to the 99th percentile for the same service. The typical request is fine while the worst ones are catastrophic. That split points away from the application.",
+    },
+    {
+      title: "Two unrelated services share one path",
+      body: "The cache and the database are both affected, despite being completely different software doing different jobs. What they share is the network segment between them and the app tier. Use the Network tools to measure it.",
+    },
+  ],
+
   keyEvidence: [
     "Ping to the data subnet shows 12–14% packet loss with high jitter",
     "p50 latency is near normal while p99 is catastrophic — a bimodal distribution",

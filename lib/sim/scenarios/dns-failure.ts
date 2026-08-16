@@ -278,6 +278,21 @@ export const dnsFailure: Scenario = {
   resolution:
     "The zone was rolled back to the previous known-good serial and negative caches were flushed across all resolvers. Name resolution recovered immediately and dependent services drained their retry backlogs over the following minute.",
 
+  hints: [
+    {
+      title: "Start by asking what is NOT broken",
+      body: "Almost every service is red, which feels like everything failed at once. Real outages rarely work that way. Open Infrastructure and look for the services that stayed green — what they have in common is usually the answer.",
+    },
+    {
+      title: "The data tier is completely healthy",
+      body: "The database, the cache and the message queue are all fine: normal CPU, normal connections, no errors. So the stored data is reachable and intact. Something is going wrong before requests ever get there.",
+    },
+    {
+      title: "Services cannot find each other",
+      body: "Open Network and try reaching a service two ways: by its name, then by its numeric address. One works and one does not. That gap is the whole incident — the machines are up, but nothing can look up where they live.",
+    },
+  ],
+
   keyEvidence: [
     "DNS resolver error rate above 90% while every data store stayed healthy",
     "`dig api.internal` returns SERVFAIL, but `ping 10.20.12.44` succeeds — the hosts are up",

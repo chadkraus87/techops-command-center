@@ -241,6 +241,21 @@ export const memoryLeak: Scenario = {
   resolution:
     "Media Service was rolled back to v3.14.1. Memory returned to baseline within one collection cycle and the transcode backlog drained over the following minute. Follow-up: add a heap-growth alert and a memory regression test to the release pipeline.",
 
+  hints: [
+    {
+      title: "Only one service is actually in trouble",
+      body: "Unlike a widespread outage, the blast radius here is tiny. Find the single service whose numbers are drifting, and note which product features depend on it.",
+    },
+    {
+      title: "Resource use is climbing without more work",
+      body: "Compare two charts for that service: how much traffic it is handling, and how much memory it is using. Traffic is flat or falling. Memory is not. Something is accumulating that should be getting cleaned up.",
+    },
+    {
+      title: "Ask what changed just before it started",
+      body: "This began at a specific moment rather than building gradually with load. Open QA Lab and line up the deployment history against when memory started climbing.",
+    },
+  ],
+
   keyEvidence: [
     "Memory climbing steadily on media-service while every other service is flat",
     "Request rate did not rise — resource use grew without extra work",

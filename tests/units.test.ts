@@ -21,6 +21,7 @@ import {
 import { evaluateAlerts } from "@/lib/sim/alerts";
 import {
   diagnosisPoints,
+  hintPenaltyFor,
   investigationPoints,
   penaltyFor,
   rankFor,
@@ -30,7 +31,8 @@ import {
 } from "@/lib/sim/scoring";
 import { dnsIsBroken, executeCommand, resolveTarget } from "@/lib/sim/network";
 import { ticketRateForTick } from "@/lib/sim/tickets";
-import { createInitialState, startScenario, tick } from "@/lib/sim/engine";
+import { createInitialState, revealHint, startScenario, tick } from "@/lib/sim/engine";
+import { getScenario, SCENARIOS } from "@/lib/sim/scenarios";
 import { getService, TOPO_ORDER, dependentsOf } from "@/lib/sim/services";
 import { buildSeries, trendOf } from "@/lib/sim/history";
 import { formatAvailability, formatCompact, formatDuration, formatLatency } from "@/lib/format";
@@ -371,6 +373,7 @@ describe("scoring", () => {
         actionsTaken: ["restore-dns-zone", "flush-resolver-cache"],
         evidenceViewed: ["a", "b", "c", "d", "e"],
         remainingSteps: [],
+        hintsRevealed: 0,
       },
     };
 
@@ -416,6 +419,7 @@ describe("scoring", () => {
         actionsTaken: ["a", "b", "c", "d", "e", "f", "g"],
         evidenceViewed: [],
         remainingSteps: ["restore-dns-zone"],
+        hintsRevealed: 0,
       },
     };
     const score = scoreIncident(terrible);
@@ -546,5 +550,159 @@ describe("formatting", () => {
     expect(formatDuration(45)).toBe("45s");
     expect(formatDuration(125)).toBe("2m 5s");
     expect(formatDuration(3700)).toBe("1h 1m");
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe("guided mode hints", () => {
+  it("gives every scenario three progressive hints", () => {
+    for (const scenario of SCENARIOS) {
+      expect(scenario.hints, scenario.id).toHaveLength(3);
+      for (const hint of scenario.hints) {
+        expect(hint.title.length, scenario.id).toBeGreaterThan(10);
+        expect(hint.body.length, scenario.id).toBeGreaterThan(60);
+      }
+    }
+  });
+
+  it("never names the correct diagnosis outright", () => {
+    // A hint that hands over the answer defeats the exercise. The third may
+    // describe the mechanism, but must not match the selectable option label.
+    for (const scenario of SCENARIOS) {
+      const answer = scenario.diagnosisOptions
+        .find((o) => o.id === scenario.correctDiagnosisId)!
+        .label.toLowerCase();
+      for (const hint of scenario.hints) {
+        const text = `${hint.title} ${hint.body}`.toLowerCase();
+        expect(text.includes(answer), `${scenario.id}: "${hint.title}"`).toBe(false);
+      }
+    }
+  });
+
+  it("reveals hints one at a time and stops at the last", () => {
+    let state = startScenario(createInitialState(EPOCH), "dns-failure");
+    const total = getScenario("dns-failure").hints.length;
+
+    for (let i = 1; i <= total; i++) {
+      state = revealHint(state);
+      expect(state.incidents[0].investigation.hintsRevealed).toBe(i);
+    }
+    // Asking again cannot push the counter past what exists.
+    state = revealHint(state);
+    expect(state.incidents[0].investigation.hintsRevealed).toBe(total);
+  });
+
+  it("records each hint on the incident timeline", () => {
+    const state = revealHint(startScenario(createInitialState(EPOCH), "redis-failure"));
+    expect(state.incidents[0].timeline.some((e) => e.message.includes("Hint 1"))).toBe(true);
+  });
+
+  it("is a no-op with no active incident", () => {
+    const healthy = createInitialState(EPOCH);
+    expect(revealHint(healthy)).toBe(healthy);
+  });
+
+  it("costs 4 points per hint", () => {
+    expect(hintPenaltyFor(0)).toBe(0);
+    expect(hintPenaltyFor(1)).toBe(4);
+    expect(hintPenaltyFor(3)).toBe(12);
+  });
+
+  it("costs less than flailing does", () => {
+    // Taking all three hints must remain cheaper than two needless actions,
+    // so guidance is never the worse strategic choice.
+    expect(hintPenaltyFor(3)).toBeLessThan(penaltyFor(["a", "b"]));
+  });
+
+  it("survives a reload, so help taken still counts", () => {
+    let state = startScenario(createInitialState(EPOCH), "dns-failure");
+    state = revealHint(revealHint(state));
+    state = advance(state, 5);
+    expect(state.incidents[0].investigation.hintsRevealed).toBe(2);
+  });
+
+  it("deducts from the final score", () => {
+    const base = startScenario(createInitialState(EPOCH), "dns-failure");
+    const withHints = revealHint(revealHint(base));
+
+    const resolved = (s: SimState) => ({
+      ...s.incidents[0],
+      resolvedAt: EPOCH + 120_000,
+      investigation: {
+        ...s.incidents[0].investigation,
+        diagnosisAttempts: ["dns-failure"],
+        diagnosedAt: EPOCH + 40_000,
+        correctDiagnosis: true,
+        actionsTaken: ["restore-dns-zone", "flush-resolver-cache"],
+        evidenceViewed: ["a", "b", "c", "d", "e"],
+        remainingSteps: [],
+      },
+    });
+
+    const clean = scoreIncident(resolved(base));
+    const hinted = scoreIncident(resolved(withHints));
+
+    expect(hinted.hintsRevealed).toBe(2);
+    expect(hinted.hintPenalty).toBe(8);
+    expect(hinted.total).toBe(clean.total - 8);
+  });
+});
+
+describe("hardening against tampered state", () => {
+  // Investigation state can arrive from restored sessionStorage, which anyone
+  // can hand-edit. None of it may reach the arithmetic unchecked.
+  const tamperedIncident = (hintsRevealed: unknown): Incident => ({
+    id: "INC-1",
+    scenarioId: "dns-failure",
+    title: "",
+    severity: "SEV-1",
+    status: "resolved",
+    startedAt: EPOCH,
+    resolvedAt: EPOCH + 120_000,
+    affectedServices: [],
+    customerImpact: "",
+    timeline: [],
+    rootCause: "",
+    resolution: "",
+    investigation: {
+      diagnosisAttempts: ["dns-failure"],
+      diagnosedAt: EPOCH + 40_000,
+      correctDiagnosis: true,
+      actionsTaken: ["restore-dns-zone", "flush-resolver-cache"],
+      evidenceViewed: ["a", "b", "c", "d", "e"],
+      remainingSteps: [],
+      hintsRevealed: hintsRevealed as number,
+    },
+  });
+
+  it.each([["a string", "abc"], ["NaN", NaN], ["Infinity", Infinity], ["negative", -5], ["null", null]])(
+    "never produces NaN from %s",
+    (_label, value) => {
+      const score = scoreIncident(tamperedIncident(value));
+      expect(Number.isFinite(score.total)).toBe(true);
+      expect(score.total).toBeGreaterThanOrEqual(0);
+      expect(score.total).toBeLessThanOrEqual(100);
+      expect(Number.isFinite(score.penalties)).toBe(true);
+    },
+  );
+
+  it("treats a non-numeric hint count as zero", () => {
+    expect(hintPenaltyFor("abc" as unknown as number)).toBe(0);
+    expect(hintPenaltyFor(NaN)).toBe(0);
+    expect(hintPenaltyFor(-3)).toBe(0);
+  });
+
+  it("increments rather than concatenates a tampered counter", () => {
+    let state = startScenario(createInitialState(EPOCH), "dns-failure");
+    state = {
+      ...state,
+      incidents: state.incidents.map((i) => ({
+        ...i,
+        investigation: { ...i.investigation, hintsRevealed: "2" as unknown as number },
+      })),
+    };
+    // "2" + 1 would be "21" without the guard.
+    expect(revealHint(state).incidents[0].investigation.hintsRevealed).toBe(3);
   });
 });

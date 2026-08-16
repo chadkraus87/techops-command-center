@@ -6,6 +6,8 @@ import {
   Activity,
   AlertTriangle,
   CheckCircle2,
+  Compass,
+  Lightbulb,
   LifeBuoy,
   Loader2,
   Network,
@@ -16,6 +18,7 @@ import {
 } from "lucide-react";
 import { cx, formatDuration } from "@/lib/format";
 import { getScenario } from "@/lib/sim/scenarios";
+import { usePreferences } from "@/lib/store/prefs";
 import { useSimStore } from "@/lib/store/sim-store";
 import { Button, Panel, PanelHeader, SectionLabel } from "@/components/ui/primitives";
 import type { Incident } from "@/lib/sim/types";
@@ -47,6 +50,8 @@ export function InvestigationPanel({ incident }: { incident: Incident }) {
   const active = useSimStore((s) => s.state.active);
   const diagnose = useSimStore((s) => s.diagnose);
   const remediate = useSimStore((s) => s.remediate);
+  const takeHint = useSimStore((s) => s.takeHint);
+  const { prefs, update } = usePreferences();
 
   const [selectedDiagnosis, setSelectedDiagnosis] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ correct: boolean; text: string } | null>(null);
@@ -65,6 +70,16 @@ export function InvestigationPanel({ incident }: { incident: Incident }) {
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Guidance */}
+      <GuidancePanel
+        scenario={scenario}
+        hintsRevealed={investigation.hintsRevealed}
+        guidedMode={prefs.guidedMode}
+        onToggleGuided={() => update({ guidedMode: !prefs.guidedMode })}
+        onTakeHint={takeHint}
+        solved={solved}
+      />
+
       {/* Evidence */}
       <Panel>
         <PanelHeader
@@ -298,7 +313,126 @@ export function InvestigationPanel({ incident }: { incident: Incident }) {
       <SectionLabel className="text-center">
         Evidence viewed: {investigation.evidenceViewed.length} · Actions taken:{" "}
         {investigation.actionsTaken.length}
+        {investigation.hintsRevealed > 0 ? ` · Hints: ${investigation.hintsRevealed}` : ""}
       </SectionLabel>
     </div>
+  );
+}
+
+/**
+ * Guided mode.
+ *
+ * Off by default, because handing an experienced visitor the answer ruins the
+ * exercise. When on, hints reveal one at a time and never name the diagnosis —
+ * the first says where to look, the second what is notable there, and the third
+ * describes the mechanism. The final judgement always stays with the operator.
+ *
+ * Hints cost 4 points each, deliberately less than a wrong guess costs, so
+ * asking for help is always better than flailing.
+ */
+function GuidancePanel({
+  scenario,
+  hintsRevealed,
+  guidedMode,
+  onToggleGuided,
+  onTakeHint,
+  solved,
+}: {
+  scenario: ReturnType<typeof getScenario>;
+  hintsRevealed: number;
+  guidedMode: boolean;
+  onToggleGuided: () => void;
+  onTakeHint: () => void;
+  solved: boolean;
+}) {
+  const total = scenario.hints.length;
+  const remaining = total - hintsRevealed;
+
+  return (
+    <Panel>
+      <PanelHeader
+        title={
+          <span className="flex items-center gap-2">
+            <Compass size={13} className="text-accent" aria-hidden="true" />
+            Guided mode
+          </span>
+        }
+        subtitle={
+          guidedMode
+            ? "Hints reveal one at a time and never name the answer."
+            : "New to this? Turn on step-by-step guidance."
+        }
+        actions={
+          <button
+            type="button"
+            role="switch"
+            aria-checked={guidedMode}
+            onClick={onToggleGuided}
+            className={cx(
+              "relative h-5 w-9 shrink-0 rounded-full border transition-colors",
+              guidedMode ? "border-accent/50 bg-accent/30" : "border-line bg-surface-3",
+            )}
+          >
+            <span className="sr-only">
+              {guidedMode ? "Turn off guided mode" : "Turn on guided mode"}
+            </span>
+            <span
+              aria-hidden="true"
+              className={cx(
+                "absolute top-0.5 h-3.5 w-3.5 rounded-full transition-all",
+                guidedMode ? "left-[18px] bg-accent" : "left-0.5 bg-ink-4",
+              )}
+            />
+          </button>
+        }
+      />
+
+      {guidedMode ? (
+        <div className="p-4">
+          {hintsRevealed === 0 ? (
+            <p className="mb-3 text-[12.5px] leading-relaxed text-ink-3">
+              Work the evidence first. If you get stuck, take a hint — each one costs 4 points,
+              which is less than a wrong diagnosis.
+            </p>
+          ) : null}
+
+          <ol className="space-y-2">
+            {scenario.hints.slice(0, hintsRevealed).map((hint, index) => (
+              <li
+                key={hint.title}
+                className="anim-fade-up rounded-md border border-accent/25 bg-accent/8 px-3 py-2.5"
+              >
+                <p className="flex items-baseline gap-2 text-[12.5px] font-medium text-ink">
+                  <span className="tabnum font-mono text-[10px] text-accent">
+                    {index + 1}/{total}
+                  </span>
+                  {hint.title}
+                </p>
+                <p className="mt-1 text-[12px] leading-relaxed text-ink-2">{hint.body}</p>
+              </li>
+            ))}
+          </ol>
+
+          {solved ? (
+            <p className="mt-3 text-[12px] text-ink-4">
+              Root cause identified — no further hints needed.
+            </p>
+          ) : remaining > 0 ? (
+            <Button
+              variant="secondary"
+              className={cx("w-full", hintsRevealed > 0 && "mt-3")}
+              icon={<Lightbulb size={13} />}
+              onClick={onTakeHint}
+            >
+              {hintsRevealed === 0 ? "Give me a hint" : `Next hint (${remaining} left)`} · −4 pts
+            </Button>
+          ) : (
+            <p className="mt-3 text-[12px] text-ink-4">
+              That is every hint. The rest is yours to work out — check the evidence links above.
+            </p>
+          )}
+        </div>
+      ) : null}
+    </Panel>
   );
 }

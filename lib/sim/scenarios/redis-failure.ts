@@ -182,6 +182,21 @@ export const redisFailure: Scenario = {
   resolution:
     "Redis was restarted with disk space reclaimed and persistence restored. Hit rate recovered as the working set warmed, database load fell back to baseline, and session latency normalised. Follow-up: alert on cache hit rate, not just cache availability.",
 
+  hints: [
+    {
+      title: "The database is loud, but is it the cause?",
+      body: "The database looks stressed. Before accepting that, check whether anything is actually asking it to do more — user traffic at the edge has not changed at all.",
+    },
+    {
+      title: "Something stopped absorbing the reads",
+      body: "The database is handling roughly four times its usual query volume with no extra users. Something that normally answers most of those reads has stopped doing so. Find the component whose hit rate collapsed.",
+    },
+    {
+      title: "The cache is refusing connections",
+      body: "Check the cache's own health rather than its effect on others. Its logs explain why it stopped accepting clients — and once it did, every lookup fell through to the database behind it.",
+    },
+  ],
+
   keyEvidence: [
     "Cache hit rate fell to 0% — the single clearest signal",
     "Database request volume rose ~4x with no increase in user traffic at the edge",

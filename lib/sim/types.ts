@@ -235,6 +235,23 @@ export interface InvestigationState {
   evidenceViewed: string[];
   /** Remediation steps still required before recovery begins. */
   remainingSteps: string[];
+  /** How many progressive hints have been revealed. Costs score. */
+  hintsRevealed: number;
+}
+
+/**
+ * A progressive hint.
+ *
+ * Three per scenario, deliberately ordered so that taking one still leaves
+ * something to work out. The first says where to look, the second says what is
+ * notable there, and only the third names the mechanism — never the exact
+ * diagnosis label, so the final judgement always belongs to the operator.
+ */
+export interface ScenarioHint {
+  /** Plain-language heading, readable without ops background. */
+  title: string;
+  /** The hint itself. */
+  body: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -457,6 +474,8 @@ export interface Scenario {
   resolution: string;
   /** Post-mortem hints surfaced on the score screen. */
   keyEvidence: string[];
+  /** Progressive in-incident guidance, revealed one at a time in guided mode. */
+  hints: ScenarioHint[];
   /** Seconds for metrics to return to baseline after remediation completes. */
   recoverySeconds: number;
 }
@@ -488,6 +507,9 @@ export interface ScoreBreakdown {
   diagnosisAttempts: number;
   unnecessaryActions: string[];
   evidenceViewedCount: number;
+  /** Hints taken, and what they cost — reported so the score is explainable. */
+  hintsRevealed: number;
+  hintPenalty: number;
 }
 
 export interface StoredResult {

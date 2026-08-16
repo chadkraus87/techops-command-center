@@ -187,6 +187,28 @@ export function loadSession(fresh: SimState): SimState | null {
     scheduledFailure: sim.scheduledFailure ?? null,
   };
 
+  // Normalise counters that feed scoring arithmetic. Restored data is
+  // user-editable, and a non-numeric value would propagate into the score.
+  restored.incidents = restored.incidents.map((incident) => ({
+    ...incident,
+    investigation: {
+      ...incident.investigation,
+      hintsRevealed: Math.max(0, Math.floor(Number(incident.investigation?.hintsRevealed) || 0)),
+      diagnosisAttempts: Array.isArray(incident.investigation?.diagnosisAttempts)
+        ? incident.investigation.diagnosisAttempts
+        : [],
+      actionsTaken: Array.isArray(incident.investigation?.actionsTaken)
+        ? incident.investigation.actionsTaken
+        : [],
+      evidenceViewed: Array.isArray(incident.investigation?.evidenceViewed)
+        ? incident.investigation.evidenceViewed
+        : [],
+      remainingSteps: Array.isArray(incident.investigation?.remainingSteps)
+        ? incident.investigation.remainingSteps
+        : [],
+    },
+  }));
+
   // Derive everything that was not stored.
   restored.services = computeServices(restored, 0);
   const rebuilt = rebuildHistory(restored);

@@ -183,6 +183,21 @@ export const paymentProviderOutage: Scenario = {
   resolution:
     "Charges were failed over to the secondary processor and the retry queue replayed against it with the original idempotency keys, so no customer was double-charged. Deferred receipts were delivered once confirmations arrived. Follow-up: shorten the provider timeout from 30s to 8s so failures surface before the customer gives up.",
 
+  hints: [
+    {
+      title: "Check how narrow the damage is",
+      body: "Only checkout is failing. Sign-in, the dashboard, images and the API all work normally. A shared internal fault would not be this contained.",
+    },
+    {
+      title: "Everything you operate is healthy",
+      body: "Database, cache, queue and every internal service are green. If nothing you run is broken, the failing dependency is not something you run.",
+    },
+    {
+      title: "The failing call leaves your network",
+      body: "Read the payment service logs. The failure is an outbound request to an external company's address, timing out after thirty seconds. You cannot fix their systems — but you can stop sending customers into them.",
+    },
+  ],
+
   keyEvidence: [
     "Every service you operate is healthy — CPU, memory, database and cache all at baseline",
     "The blast radius is exactly one service, and it is the only one with an external dependency",

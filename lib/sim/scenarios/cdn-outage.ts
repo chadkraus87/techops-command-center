@@ -184,6 +184,21 @@ export const cdnOutage: Scenario = {
   resolution:
     "The failed region was withdrawn from the anycast announcement and traffic re-routed to healthy regions. Edge error rate returned to baseline immediately; cache hit rate recovered over the next few minutes as the surviving regions warmed. Follow-up: make health-check failure withdraw the announcement automatically.",
 
+  hints: [
+    {
+      title: "Ask where the affected users are",
+      body: "Read the support tickets carefully. Customers are not all reporting the same thing, and some say colleagues elsewhere are fine. That pattern is geographic, not functional.",
+    },
+    {
+      title: "Everything you run is healthy",
+      body: "Check the origin services — frontend, API, database. They are all green, and their traffic has gone up rather than down. They are absorbing work that something in front of them normally handles.",
+    },
+    {
+      title: "The failure is at the edge, in one region",
+      body: "The layer closest to users is failing in a single region while the rest of the world is served fine. Compare the edge's error rate and cache hit rate against the healthy origin behind it.",
+    },
+  ],
+
   keyEvidence: [
     "Failures are geographic — the same asset succeeds from one region and fails from another",
     "Edge error rate spiked while every origin service stayed healthy",

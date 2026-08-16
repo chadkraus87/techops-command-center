@@ -99,3 +99,49 @@ test.describe("mobile layout", () => {
     await expect(page.getByRole("heading", { name: /Simulation Center/i })).toBeVisible();
   });
 });
+
+test.describe("header fits its viewport", () => {
+  test("status, clock and controls never collide", async ({ page }) => {
+    await page.goto("/");
+    await dismissOnboarding(page);
+
+    // Check both the healthy state and mid-incident, since the status label
+    // changes width and the incident adds a button.
+    for (const setup of ["healthy", "incident"] as const) {
+      if (setup === "incident") {
+        await page.goto("/simulation");
+        const card = page
+          .locator("button[aria-expanded]")
+          .filter({ hasText: "DNS Resolution Failure" });
+        if ((await card.getAttribute("aria-expanded")) !== "true") await card.click();
+        await page.locator("button").filter({ hasText: /^Start simulation$/ }).first().click();
+        await page.waitForTimeout(2000);
+      }
+
+      const collision = await page.evaluate(() => {
+        const header = document.querySelector("header");
+        if (!header) return null;
+        const boxes = [...header.querySelectorAll("*")]
+          .filter((el) => el.children.length === 0 && (el.textContent ?? "").trim().length > 0)
+          .map((el) => ({
+            text: (el.textContent ?? "").trim().slice(0, 24),
+            rect: el.getBoundingClientRect(),
+          }))
+          .filter((b) => b.rect.width > 0);
+
+        for (let i = 0; i < boxes.length; i++) {
+          for (let j = i + 1; j < boxes.length; j++) {
+            const a = boxes[i].rect;
+            const b = boxes[j].rect;
+            const overlapX = a.right > b.left + 1 && a.left < b.right - 1;
+            const overlapY = a.bottom > b.top + 1 && a.top < b.bottom - 1;
+            if (overlapX && overlapY) return `${boxes[i].text} ↔ ${boxes[j].text}`;
+          }
+        }
+        return null;
+      });
+
+      expect(collision, `header text collides (${setup})`).toBeNull();
+    }
+  });
+});

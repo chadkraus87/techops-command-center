@@ -647,6 +647,7 @@ export function startScenario(state: SimState, scenarioId: ScenarioId): SimState
       actionsTaken: [],
       evidenceViewed: [],
       remainingSteps: [...scenario.requiredRemediationIds],
+      hintsRevealed: 0,
     },
   };
 
@@ -767,6 +768,40 @@ export function applyRemediation(state: SimState, actionId: string): Remediation
     },
     accepted: true,
     message: `${option.label} — in progress (${option.durationSeconds}s)`,
+  };
+}
+
+/**
+ * Reveal the next hint.
+ *
+ * Recorded on the incident rather than in UI state so it survives a reload and
+ * still costs points afterwards — taking help you then "forget" would make the
+ * score meaningless.
+ */
+export function revealHint(state: SimState): SimState {
+  const active = state.active;
+  if (!active) return state;
+
+  const scenario = getScenario(active.scenarioId);
+
+  return {
+    ...state,
+    incidents: state.incidents.map((incident) => {
+      if (incident.id !== active.incidentId) return incident;
+      // Number() guards against a tampered restore, where `x + 1` on a string
+      // would concatenate instead of increment.
+      const current = Number(incident.investigation.hintsRevealed);
+      const next = (Number.isFinite(current) && current >= 0 ? Math.floor(current) : 0) + 1;
+      if (next > scenario.hints.length) return incident;
+      return {
+        ...incident,
+        timeline: [
+          ...incident.timeline,
+          timelineEvent(state.clock, "note", `Hint ${next} revealed: ${scenario.hints[next - 1].title}`, "You"),
+        ],
+        investigation: { ...incident.investigation, hintsRevealed: next },
+      };
+    }),
   };
 }
 

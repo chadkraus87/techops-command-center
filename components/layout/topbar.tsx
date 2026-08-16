@@ -32,7 +32,12 @@ import type { SimSpeed } from "@/lib/sim/types";
 /**
  * Two labels per state: the full phrase where there is room, and a short form
  * for narrow screens. Truncating the long one to "All S…" tells the operator
- * nothing, which defeats the point of a always-visible status indicator.
+ * nothing, which defeats the point of an always-visible status indicator.
+ *
+ * The long label, the page title and the clock all appear at `md` rather than
+ * `sm`. Between 640px and 767px the header has room for the status pill *or*
+ * the clock, not both — at `sm` they collided, with the pill overflowing its
+ * flex container and running into the digits.
  */
 const STATUS_COPY = {
   operational: {
@@ -86,7 +91,7 @@ export function Topbar({
 
       {/* Page identity + global status */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        <h1 className="hidden shrink-0 text-[13px] font-semibold tracking-tight text-ink sm:block">
+        <h1 className="hidden shrink-0 text-[13px] font-semibold tracking-tight text-ink md:block">
           {pageTitle}
         </h1>
 
@@ -100,14 +105,14 @@ export function Topbar({
         >
           <Beacon status={copy.status} />
           <span className={cx("text-[11.5px] font-medium", STATUS_TEXT_CLASS[copy.status])}>
-            <span className="sm:hidden">{copy.short}</span>
-            <span className="hidden sm:inline">{copy.label}</span>
+            <span className="md:hidden">{copy.short}</span>
+            <span className="hidden md:inline">{copy.label}</span>
           </span>
         </div>
       </div>
 
       {/* Operations clock */}
-      <div className="hidden items-center gap-2 border-l border-line pl-3 sm:flex">
+      <div className="hidden items-center gap-2 border-l border-line pl-3 md:flex">
         <div className="text-right">
           <p className="tabnum font-mono text-[13px] font-medium leading-none text-ink">
             {formatTime(clock)}

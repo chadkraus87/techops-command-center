@@ -20,6 +20,15 @@ environment is already running.
 
 ---
 
+## See it work
+
+A DNS failure, start to diagnosis — triggered, spreading across the dashboard, isolated on the
+dependency map, and confirmed with the network tools.
+
+![TechOps Command Center demo: triggering a DNS incident, watching it spread, and diagnosing it](docs/demo.gif)
+
+---
+
 ## Screenshots
 
 ### Command Center
@@ -70,8 +79,8 @@ evidence that mattered.
 - **Operations knowledge** — SLO-derived alerting with evaluation windows,
   dependency cascades, tail-latency behaviour under saturation, and incident
   management workflow
-- **Testing** — 105 unit tests over a pure, deterministic simulation engine, plus
-  15 Playwright end-to-end tests across desktop and mobile
+- **Testing** — 147 unit tests over a pure, deterministic simulation engine, plus
+  25 Playwright end-to-end tests across desktop, tablet and mobile
 
 ---
 
@@ -103,6 +112,13 @@ evidence that mattered.
 ### Release engineering
 - **QA Lab** — deployment history, test suites, feature flags, known defects, and
   a risky deployment that succeeds and then destabilises production minutes later
+
+### Learning
+- **Guided mode** — off by default. When on, three progressive hints reveal one
+  at a time: where to look, what is notable there, then the mechanism. None ever
+  names the diagnosis, so the final call stays yours. Hints cost 4 points each —
+  deliberately less than a wrong guess, so asking for direction is never the
+  worse strategy.
 
 ### Sharing
 - **Shareable results** — a finished run encodes into the URL, so it can be sent
@@ -146,7 +162,7 @@ evidence that mattered.
 | Icons | Lucide | |
 | Fonts | Geist (self-hosted) | No third-party request, no network dependency at build |
 | Unit tests | Vitest | Fast, and the engine is pure so tests need no DOM |
-| E2E tests | Playwright | Desktop journeys plus a mobile responsive suite |
+| E2E tests | Playwright | Desktop journeys plus responsive suites at tablet and mobile |
 
 ---
 
@@ -333,17 +349,18 @@ Open <http://localhost:3000>.
 ### Testing
 
 ```bash
-npm test           # 105 unit tests over the simulation engine
+npm test           # 147 unit tests over the simulation engine
 npm run test:watch # watch mode
-npm run test:e2e   # 15 Playwright tests against a production build
+npm run test:e2e   # 25 Playwright tests against a production build
 ```
 
-**Unit tests (Vitest, 105)** cover incident state transitions, metric ramp and
+**Unit tests (Vitest, 147)** cover incident state transitions, metric ramp and
 recovery curves, service health derivation, dependency cascade attenuation, alert
 evaluation windows, diagnosis and scoring, remediation gating, session
-persistence, the network tools, and the determinism guarantee itself.
+persistence, guided-mode hints, shared-link encoding, the network tools, and the
+determinism guarantee itself.
 
-**End-to-end tests (Playwright, 15)** deliberately do *not* re-assert simulation
+**End-to-end tests (Playwright, 25)** deliberately do *not* re-assert simulation
 behaviour — the unit tests own that. They cover the one thing unit tests cannot:
 that a person can actually work an incident in a browser. They run against a
 production build, because dev-only React behaviour has masked real bugs here
@@ -352,18 +369,23 @@ before.
 - `desktop` — full journeys: trigger → investigate → diagnose → remediate →
   score, session restore across a reload, the network terminal's diagnostic
   contradiction, and a console-error sweep across every route
-- `mobile` — what genuinely differs on a phone: the nav drawer, restacked tables,
-  and an assertion that **no route scrolls horizontally**, which has caught two
-  real layout bugs that were invisible on desktop
+- `mobile` and `tablet` — what genuinely differs at each width: the nav drawer,
+  restacked tables, an assertion that **no route scrolls horizontally**, and a
+  check that no two pieces of header text overlap. Between them these have caught
+  three real layout bugs that were invisible at desktop width — including one that
+  only appeared in the 640–767px band, which is why `tablet` exists at all
 
-### Screenshots
+### Screenshots and the demo GIF
 
 ```bash
-npm run screenshots        # against localhost:3000
-npm run screenshots -- https://your-deployment.vercel.app
+npm run build && npx next start -p 3212   # in one terminal
+npm run screenshots -- http://localhost:3212
+npm run demo -- http://localhost:3212
 ```
 
-Drives a real incident end to end and captures each view mid-failure.
+Both drive a real incident rather than posing a healthy dashboard. `demo` captures
+frames and encodes an animated GIF — a GIF rather than video because that is what
+GitHub renders inline from a repo path.
 
 ### Type checking and linting
 
@@ -441,6 +463,7 @@ lib/
     api.ts                 Endpoint statistics
     scoring.ts             Incident scoring
     share.ts               Encode/decode a run into a shareable link
+    scenarios/*.ts         One file per incident, including its guided hints
     history.ts             Chart series construction
     random.ts              Seeded, deterministic randomness
   store/                   Zustand store and localStorage preferences
@@ -450,6 +473,7 @@ lib/
 tests/                     Vitest unit suites
   e2e/                     Playwright specs (desktop journeys + mobile)
 scripts/screenshots.mjs    Captures README screenshots from a real incident
+scripts/demo-gif.mjs       Records the README demo GIF, driving a live incident
 .github/workflows/ci.yml   Types, lint, unit tests, build, and E2E on every push
 ```
 

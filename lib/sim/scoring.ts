@@ -63,6 +63,30 @@ export function penaltyFor(unnecessaryActions: string[]): number {
   return Math.min(30, unnecessaryActions.length * 8);
 }
 
+/**
+ * Coerce a possibly-tampered count to a sane non-negative integer.
+ *
+ * Investigation state can arrive from restored sessionStorage, which is
+ * user-editable. Without this, a hand-edited value propagates straight through
+ * the arithmetic and renders as "NaN/100".
+ */
+function safeCount(value: unknown): number {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.floor(n);
+}
+
+/**
+ * Hints cost points, and deliberately less than a wrong guess.
+ *
+ * The intent is that asking for help is always better than flailing: three
+ * hints cost 12, while two wrong diagnoses plus a needless restart costs 22.
+ * Guidance should feel like a legitimate choice, not a walk of shame.
+ */
+export function hintPenaltyFor(hintsRevealed: number): number {
+  return safeCount(hintsRevealed) * 4;
+}
+
 export function rankFor(score: number): Rank {
   if (score >= 95) return "Site Reliability Expert";
   if (score >= 85) return "Incident Commander";
@@ -105,7 +129,8 @@ export function scoreIncident(incident: Incident): ScoreBreakdown {
   const unnecessaryActions = investigation.actionsTaken.filter(
     (id) => !scenario.requiredRemediationIds.includes(id),
   );
-  const penalties = penaltyFor(unnecessaryActions);
+  const hintPenalty = hintPenaltyFor(investigation.hintsRevealed);
+  const penalties = penaltyFor(unnecessaryActions) + hintPenalty;
 
   const total = Math.max(
     0,
@@ -125,6 +150,8 @@ export function scoreIncident(incident: Incident): ScoreBreakdown {
     diagnosisAttempts: investigation.diagnosisAttempts.length,
     unnecessaryActions,
     evidenceViewedCount: investigation.evidenceViewed.length,
+    hintsRevealed: safeCount(investigation.hintsRevealed),
+    hintPenalty,
   };
 }
 

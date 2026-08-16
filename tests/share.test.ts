@@ -33,6 +33,7 @@ function incidentFixture(overrides: Partial<Incident["investigation"]> = {}): In
       actionsTaken: ["restore-dns-zone", "flush-resolver-cache"],
       evidenceViewed: ["a", "b", "c"],
       remainingSteps: [],
+      hintsRevealed: 0,
       ...overrides,
     },
   };

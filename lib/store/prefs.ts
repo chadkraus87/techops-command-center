@@ -21,6 +21,8 @@ export interface Preferences {
   onboardingDismissed: boolean;
   soundEnabled: boolean;
   reducedChrome: boolean;
+  /** Guided mode: surfaces progressive hints during an investigation. */
+  guidedMode: boolean;
   results: StoredResult[];
 }
 
@@ -28,6 +30,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   onboardingDismissed: false,
   soundEnabled: false,
   reducedChrome: false,
+  // Off by default: an experienced visitor should not be handed the answer.
+  guidedMode: false,
   results: [],
 };
 
@@ -84,6 +88,7 @@ function parse(raw: string | null): Preferences {
       onboardingDismissed: parsed.onboardingDismissed === true,
       soundEnabled: parsed.soundEnabled === true,
       reducedChrome: parsed.reducedChrome === true,
+      guidedMode: parsed.guidedMode === true,
       results: Array.isArray(parsed.results) ? parsed.results.filter(isStoredResult) : [],
     };
   } catch {
@@ -133,10 +138,10 @@ function write(next: Preferences): void {
   initialised = true;
   try {
     // `loaded` is transient render state, not a preference — never persist it.
-    const { onboardingDismissed, soundEnabled, reducedChrome, results } = next;
+    const { onboardingDismissed, soundEnabled, reducedChrome, guidedMode, results } = next;
     window.localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ onboardingDismissed, soundEnabled, reducedChrome, results }),
+      JSON.stringify({ onboardingDismissed, soundEnabled, reducedChrome, guidedMode, results }),
     );
   } catch {
     // Quota or private browsing — the value still applies for this session.

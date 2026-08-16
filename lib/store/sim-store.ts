@@ -8,6 +8,7 @@ import {
   createInitialState,
   endScenario,
   recordEvidence,
+  revealHint,
   resetEnvironment,
   startScenario,
   submitDiagnosis,
@@ -64,6 +65,8 @@ interface SimStore {
   diagnose: (optionId: string) => { correct: boolean; feedback: string };
   remediate: (actionId: string) => { accepted: boolean; message: string };
   noteEvidence: (evidenceId: string) => void;
+  /** Reveal the next progressive hint. Costs score. */
+  takeHint: () => void;
   acknowledge: (alertId: string) => void;
   clearScenario: () => void;
   /** Abandon an incident in progress and return the environment to baseline. */
@@ -188,6 +191,8 @@ export const useSimStore = create<SimStore>((set, get) => ({
   },
 
   noteEvidence: (evidenceId) => set((s) => ({ state: recordEvidence(s.state, evidenceId) })),
+
+  takeHint: () => set((s) => ({ state: revealHint(s.state) })),
 
   acknowledge: (alertId) => set((s) => ({ state: acknowledgeAlert(s.state, alertId) })),
 

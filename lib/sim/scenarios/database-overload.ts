@@ -280,6 +280,21 @@ export const databaseOverload: Scenario = {
   resolution:
     "The long-running sessions were terminated to release their connections, and pool capacity was raised to give the backlog room to drain. Latency returned to baseline as queued work cleared. Follow-up: add the missing composite index and set a statement timeout on the reporting role.",
 
+  hints: [
+    {
+      title: "Follow the slowness downwards",
+      body: "The complaints are about the website and the API, but those are just the surface. Open Metrics and walk down the stack — edge, then app, then data — and find the deepest layer that is already unhealthy.",
+    },
+    {
+      title: "One shared component is the bottleneck",
+      body: "Several services degraded at the same moment, and they are not related to each other except in one way: they all read from the same place. Check that shared component's own numbers rather than theirs.",
+    },
+    {
+      title: "It has run out of a limited resource",
+      body: "The database is not out of CPU by accident — look at how many simultaneous connections it is holding versus how many it is allowed. Requests are not failing; they are queueing behind a full pool.",
+    },
+  ],
+
   keyEvidence: [
     "Database connections pinned at 198–199 against a limit of 200",
     "Postgres logs show 'remaining connection slots are reserved' and an 8.4s sequential scan",

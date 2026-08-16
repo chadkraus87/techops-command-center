@@ -194,6 +194,21 @@ export const tlsExpiry: Scenario = {
   resolution:
     "A replacement certificate was issued from the internal CA and distributed to every terminating proxy, then the mesh was signalled to reload. Handshakes succeeded immediately and traffic recovered as clients retried. Follow-up: restore expiry alerting and fail the renewal job loudly.",
 
+  hints: [
+    {
+      title: "Look at the shape, not just the size",
+      body: "Errors went from near zero to near total instantly, with no ramp. Gradual problems build; this one flipped. That shape narrows the possibilities enormously.",
+    },
+    {
+      title: "Requests are failing faster than normal",
+      body: "Check latency alongside the errors. It went down, not up. An overloaded system gets slower — this one is rejecting work immediately, before doing any of it.",
+    },
+    {
+      title: "Connections are refused at the handshake",
+      body: "Something is rejecting connections before any request is processed. Read the load balancer logs — they name the exact reason, and the timestamp matches the moment everything broke.",
+    },
+  ],
+
   keyEvidence: [
     "Error rate went vertical with no ramp — a handshake refusal, not a resource exhaustion",
     "Latency fell while errors rose: requests were failing fast rather than timing out",
