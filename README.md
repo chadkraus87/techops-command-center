@@ -79,8 +79,8 @@ evidence that mattered.
 - **Operations knowledge** — SLO-derived alerting with evaluation windows,
   dependency cascades, tail-latency behaviour under saturation, and incident
   management workflow
-- **Testing** — 147 unit tests over a pure, deterministic simulation engine, plus
-  25 Playwright end-to-end tests across desktop, tablet and mobile
+- **Testing** — 159 unit tests over a pure, deterministic simulation engine, plus
+  28 Playwright end-to-end tests across desktop, tablet and mobile
 
 ---
 
@@ -113,6 +113,13 @@ evidence that mattered.
 - **QA Lab** — deployment history, test suites, feature flags, known defects, and
   a risky deployment that succeeds and then destabilises production minutes later
 
+### Replay
+- **Scrub back through any resolved incident** — watch the cascade spread and
+  recover, second by second. No frames are recorded while it runs: every position
+  is reconstructed on demand from the scenario plus two numbers, because the
+  engine is a pure function of (tick, clock, elapsed). A test asserts a
+  reconstructed frame matches the live state exactly.
+
 ### Learning
 - **Guided mode** — off by default. When on, three progressive hints reveal one
   at a time: where to look, what is notable there, then the mechanism. None ever
@@ -124,6 +131,12 @@ evidence that mattered.
 - **Shareable results** — a finished run encodes into the URL, so it can be sent
   to someone with no account and nothing stored server-side. Arriving from a
   shared link is one click from running the same scenario yourself.
+
+### Appearance
+- **Light theme** — opt-in, not an inversion. Status hues are re-picked so they
+  hold their meaning on a light ground, and the terminal stays dark because a
+  console that turns white stops reading as a console. Dark remains the default
+  regardless of OS preference: it is the product's identity.
 
 ### Session handling
 - **Reload-safe** — an incident you are three minutes into investigating survives
@@ -349,18 +362,18 @@ Open <http://localhost:3000>.
 ### Testing
 
 ```bash
-npm test           # 147 unit tests over the simulation engine
+npm test           # 159 unit tests over the simulation engine
 npm run test:watch # watch mode
-npm run test:e2e   # 25 Playwright tests against a production build
+npm run test:e2e   # 28 Playwright tests against a production build
 ```
 
-**Unit tests (Vitest, 147)** cover incident state transitions, metric ramp and
+**Unit tests (Vitest, 159)** cover incident state transitions, metric ramp and
 recovery curves, service health derivation, dependency cascade attenuation, alert
 evaluation windows, diagnosis and scoring, remediation gating, session
-persistence, guided-mode hints, shared-link encoding, the network tools, and the
-determinism guarantee itself.
+persistence, guided-mode hints, shared-link encoding, incident replay, the
+network tools, and the determinism guarantee itself.
 
-**End-to-end tests (Playwright, 25)** deliberately do *not* re-assert simulation
+**End-to-end tests (Playwright, 28)** deliberately do *not* re-assert simulation
 behaviour — the unit tests own that. They cover the one thing unit tests cannot:
 that a person can actually work an incident in a browser. They run against a
 production build, because dev-only React behaviour has masked real bugs here
@@ -446,7 +459,7 @@ components/
   dashboard/               Hero status, activity feed
   topology/                Dependency map
   services/                Service detail drawer
-  incidents/               Incident timeline
+  incidents/               Incident timeline and replay scrubber
   simulation/              Scenario picker, investigation, score report
 
 lib/
@@ -514,8 +527,6 @@ scripts/demo-gif.mjs       Records the README demo GIF, driving a live incident
 - A scenario editor so visitors can compose their own incidents
 - Runbook authoring with step-by-step guided remediation
 - An on-call rotation and paging simulation
-- Replay mode — scrub back through an incident's timeline
-- Optional light theme
 
 ---
 

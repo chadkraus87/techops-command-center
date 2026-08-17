@@ -187,10 +187,30 @@ export function loadSession(fresh: SimState): SimState | null {
     scheduledFailure: sim.scheduledFailure ?? null,
   };
 
+  /**
+   * Drop any incident referencing a scenario that no longer exists.
+   *
+   * Seven call sites pass `incident.scenarioId` to `getScenario()`, which throws
+   * on an unknown id — scoring, replay, the incidents page and the investigation
+   * panel among them. One tampered or stale id would crash the page on every
+   * load, unrecoverable without clearing storage by hand. Dropping the record is
+   * the graceful option.
+   */
+  restored.incidents = restored.incidents.filter(
+    (incident) => incident && findScenario(String(incident.scenarioId)) !== undefined,
+  );
+
   // Normalise counters that feed scoring arithmetic. Restored data is
   // user-editable, and a non-numeric value would propagate into the score.
   restored.incidents = restored.incidents.map((incident) => ({
     ...incident,
+    // Replay does arithmetic with these; a non-numeric value yields NaN metrics.
+    startedAtTick: Number.isFinite(Number(incident.startedAtTick))
+      ? Math.max(0, Math.floor(Number(incident.startedAtTick)))
+      : 0,
+    recoveryStartedAtElapsed: Number.isFinite(Number(incident.recoveryStartedAtElapsed))
+      ? Math.max(0, Number(incident.recoveryStartedAtElapsed))
+      : null,
     investigation: {
       ...incident.investigation,
       hintsRevealed: Math.max(0, Math.floor(Number(incident.investigation?.hintsRevealed) || 0)),
@@ -208,6 +228,12 @@ export function loadSession(fresh: SimState): SimState | null {
         : [],
     },
   }));
+
+  // If the active incident was discarded above, the pointer to it must go too,
+  // or the UI would render an incident-in-progress that does not exist.
+  if (restored.active && !restored.incidents.some((i) => i.id === restored.active?.incidentId)) {
+    restored.active = null;
+  }
 
   // Derive everything that was not stored.
   restored.services = computeServices(restored, 0);

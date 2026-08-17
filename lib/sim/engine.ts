@@ -268,6 +268,8 @@ interface ProgressionResult {
   events: TimelineEvent[];
   /** Set when the incident's status should change. */
   incidentStatus?: Incident["status"];
+  /** Set on the tick recovery begins, for replay reconstruction. */
+  recoveryStartedAtElapsed?: number;
 }
 
 function advanceScenario(state: SimState, dtSeconds: number): ProgressionResult {
@@ -278,6 +280,7 @@ function advanceScenario(state: SimState, dtSeconds: number): ProgressionResult 
   const events: TimelineEvent[] = [];
   let next = { ...active, elapsed: active.elapsed + dtSeconds };
   let incidentStatus: Incident["status"] | undefined;
+  let recoveryStartedAtElapsed: number | undefined;
 
   // A remediation action in flight ticks down before anything else happens.
   if (next.pendingAction) {
@@ -309,6 +312,7 @@ function advanceScenario(state: SimState, dtSeconds: number): ProgressionResult 
       if (isRequired && remainingSteps.length === 0) {
         next = { ...next, pendingAction: null, phase: "recovering", recoveryElapsed: 0.0001 };
         incidentStatus = "monitoring";
+        recoveryStartedAtElapsed = next.elapsed;
         events.push(
           timelineEvent(state.clock, "recovery", "Remediation complete — metrics returning to baseline", "System"),
         );
@@ -355,7 +359,7 @@ function advanceScenario(state: SimState, dtSeconds: number): ProgressionResult 
     );
   }
 
-  return { active: next, events, incidentStatus };
+  return { active: next, events, incidentStatus, recoveryStartedAtElapsed };
 }
 
 // ---------------------------------------------------------------------------
@@ -443,6 +447,101 @@ export function rebuildHistory(state: SimState): Pick<SimState, "history" | "glo
       tickets: Array.from({ length: HISTORY_LENGTH }, () => 0),
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// Replay
+// ---------------------------------------------------------------------------
+
+export interface ReplayFrame {
+  /** Seconds since the incident began. */
+  elapsed: number;
+  clock: number;
+  services: Record<ServiceId, ServiceRuntime>;
+  /** Timeline events that had happened by this point. */
+  events: TimelineEvent[];
+}
+
+/**
+ * Reconstruct any moment of a past incident.
+ *
+ * This exists because the engine is pure and deterministic: telemetry is a
+ * function of (tick, clock, elapsed), so reaching an arbitrary point costs one
+ * evaluation rather than replaying the run. No frames are recorded during the
+ * incident — only two numbers are (`startedAtTick` and
+ * `recoveryStartedAtElapsed`), and everything else is derived on demand.
+ *
+ * Health cascade is applied exactly as it is live, so a replayed frame is
+ * indistinguishable from the original.
+ */
+export function replayIncidentAt(incident: Incident, elapsedSeconds: number): ReplayFrame {
+  // Defensive: an incident can arrive from restored storage, and a non-finite
+  // value here would silently produce NaN telemetry rather than failing loudly.
+  const elapsed = Number.isFinite(elapsedSeconds) ? Math.max(0, elapsedSeconds) : 0;
+  const startedAtTick = Number.isFinite(incident.startedAtTick)
+    ? Math.max(0, Math.floor(incident.startedAtTick))
+    : 0;
+  const clock = incident.startedAt + elapsed * 1000;
+
+  const recoveryStart = Number.isFinite(incident.recoveryStartedAtElapsed as number)
+    ? (incident.recoveryStartedAtElapsed as number)
+    : null;
+  const recoveryElapsed = recoveryStart === null ? 0 : Math.max(0, elapsed - recoveryStart);
+
+  // A synthetic `active` describing the scenario at that instant.
+  const active: SimState["active"] = {
+    scenarioId: incident.scenarioId,
+    incidentId: incident.id,
+    startedAt: incident.startedAt,
+    elapsed,
+    phase: recoveryElapsed > 0 ? "recovering" : "sustained",
+    intensity: 1,
+    recoveryElapsed,
+    pendingAction: null,
+  };
+
+  const impacts = impactsAt(active, 0);
+  const scenario = getScenario(incident.scenarioId);
+  const unreachable = new Set<ServiceId>();
+  if (recoveryElapsed === 0) {
+    for (const entry of scenario.unreachable ?? []) {
+      if (elapsed >= (entry.delaySeconds ?? 0)) unreachable.add(entry.service);
+    }
+  }
+
+  const services = {} as Record<ServiceId, ServiceRuntime>;
+  for (const def of SERVICES) {
+    let raw = baselineMetrics(def, startedAtTick + elapsed, clock);
+    for (const apply of impacts.get(def.id) ?? []) raw = apply(raw);
+    const metrics = finaliseMetrics(def, raw);
+
+    const reachable = !unreachable.has(def.id);
+    const { status, reason } = deriveOwnStatus(def, metrics, reachable);
+    services[def.id] = {
+      id: def.id,
+      status,
+      metrics,
+      reachable,
+      // Uptime counters are not meaningful for a single reconstructed frame.
+      uptimeSeconds: SEEDED_UPTIME_SECONDS,
+      downtimeSeconds: 0,
+      reason,
+    };
+  }
+
+  return {
+    elapsed,
+    clock,
+    services: propagateHealth(services),
+    events: incident.timeline.filter((event) => event.timestamp <= clock),
+  };
+}
+
+/** Total seconds a replay can scrub across. */
+export function replayDuration(incident: Incident): number {
+  const end = incident.resolvedAt ?? incident.startedAt;
+  // Give a resolved incident a short tail so the recovered state is visible.
+  return Math.max(1, Math.round((end - incident.startedAt) / 1000) + 10);
 }
 
 // ---------------------------------------------------------------------------
@@ -559,6 +658,8 @@ export function tick(state: SimState, dtSeconds = 1): TickResult {
                 : incident.timeline,
             status: nextStatus ?? incident.status,
             resolvedAt: nextStatus === "resolved" ? clock : incident.resolvedAt,
+            recoveryStartedAtElapsed:
+              progression.recoveryStartedAtElapsed ?? incident.recoveryStartedAtElapsed,
           }
         : incident,
     );
@@ -633,6 +734,8 @@ export function startScenario(state: SimState, scenarioId: ScenarioId): SimState
     status: "investigating",
     startedAt: state.clock,
     resolvedAt: null,
+    startedAtTick: state.tickCount,
+    recoveryStartedAtElapsed: null,
     affectedServices: scenario.affectedServices,
     customerImpact: scenario.customerImpact,
     timeline: [

@@ -32,8 +32,8 @@ const STACK = [
   { name: "Tailwind CSS v4", detail: "CSS-first theme with design tokens in @theme" },
   { name: "Zustand", detail: "Single store, narrow selectors to control re-renders" },
   { name: "Recharts", detail: "Time-series and percentile charts" },
-  { name: "Vitest", detail: "131 unit tests over the simulation engine" },
-  { name: "Playwright", detail: "19 end-to-end tests, desktop and mobile, run in CI" },
+  { name: "Vitest", detail: "159 unit tests over the simulation engine" },
+  { name: "Playwright", detail: "28 end-to-end tests across three viewports, run in CI" },
   { name: "Lucide", detail: "Icon set" },
 ];
 
@@ -210,7 +210,7 @@ export default function AboutPage() {
         <PanelHeader title="Testing strategy" />
         <div className="space-y-3 p-5 text-[12.5px] leading-relaxed text-ink-2">
           <p>
-            131 unit tests target the simulation engine rather than the interface, because that is
+            159 unit tests target the simulation engine rather than the interface, because that is
             where the behaviour that matters lives — and because a pure engine is cheap to test
             exhaustively. They cover incident state transitions, metric ramp and recovery curves,
             service health derivation, dependency cascade attenuation, alert evaluation windows,
@@ -223,10 +223,10 @@ export default function AboutPage() {
             every other test is reproducible; if it fails, none of them mean anything.
           </p>
           <p>
-            On top of that, 19 Playwright tests cover the one thing unit tests cannot: that a person
+            On top of that, 28 Playwright tests cover the one thing unit tests cannot: that a person
             can actually work an incident in a browser. They run against a production build, split
-            into desktop journeys and a mobile suite whose horizontal-overflow assertion has already
-            caught two real layout regressions that were invisible on a desktop. Everything runs in
+            into desktop journeys and responsive suites at tablet and mobile whose layout assertions
+            have already caught three real regressions invisible at desktop width. Everything runs in
             CI on every push.
           </p>
         </div>

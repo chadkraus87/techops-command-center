@@ -21,6 +21,8 @@ function incidentFixture(overrides: Partial<Incident["investigation"]> = {}): In
     status: "resolved",
     startedAt: EPOCH,
     resolvedAt: EPOCH + 180_000,
+    startedAtTick: 0,
+    recoveryStartedAtElapsed: 120,
     affectedServices: [],
     customerImpact: "",
     timeline: [],

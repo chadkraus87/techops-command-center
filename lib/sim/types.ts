@@ -214,6 +214,17 @@ export interface Incident {
   status: IncidentStatus;
   startedAt: number;
   resolvedAt: number | null;
+  /**
+   * The tick the incident began on. Together with `startedAt` this is enough to
+   * reconstruct the exact telemetry at any moment of the run, because the
+   * baseline model is a pure function of tick and clock.
+   */
+  startedAtTick: number;
+  /**
+   * Elapsed seconds at which recovery began, or null if it never did. The only
+   * other fact replay needs — impact unwind is a pure function of it.
+   */
+  recoveryStartedAtElapsed: number | null;
   affectedServices: ServiceId[];
   customerImpact: string;
   timeline: TimelineEvent[];

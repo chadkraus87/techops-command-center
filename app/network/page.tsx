@@ -197,7 +197,7 @@ export default function NetworkPage() {
 
           <div
             ref={outputRef}
-            className="h-[400px] overflow-y-auto bg-void/70 px-3.5 py-3 font-mono text-[11.5px] leading-[1.55]"
+            className="terminal-surface h-[400px] overflow-y-auto bg-void/70 px-3.5 py-3 font-mono text-[11.5px] leading-[1.55]"
             role="log"
             aria-label="Terminal output"
           >

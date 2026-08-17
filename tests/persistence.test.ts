@@ -3,6 +3,7 @@ import {
   abortScenario,
   createInitialState,
   rebuildHistory,
+  replayIncidentAt,
   startScenario,
   tick,
 } from "@/lib/sim/engine";
@@ -263,5 +264,51 @@ describe("abandoning an incident", () => {
     expect(next.active?.scenarioId).toBe("tls-expiry");
     expect(next.incidents).toHaveLength(2);
     expect(next.services["api-gateway"].status).not.toBe("healthy");
+  });
+});
+
+describe("hardening restored incidents", () => {
+  it("drops an incident referencing an unknown scenario instead of crashing", async () => {
+    const { saveSession, loadSession } = await persistence();
+    saveSession(runScenario("dns-failure", 60));
+
+    const raw = JSON.parse(storage.getItem("techops.session.v1")!);
+    raw.sim.incidents[0].scenarioId = "deleted-scenario";
+    storage.setItem("techops.session.v1", JSON.stringify(raw));
+
+    // getScenario() throws on unknown ids and is reached from seven call sites
+    // (scoring, replay, the incidents page…), so this must never get through.
+    const restored = loadSession(createInitialState(EPOCH));
+    expect(() => loadSession(createInitialState(EPOCH))).not.toThrow();
+    expect(restored!.incidents).toHaveLength(0);
+    // The pointer to it must go too, or the UI renders a phantom incident.
+    expect(restored!.active).toBeNull();
+  });
+
+  it("normalises replay counters that would otherwise yield NaN telemetry", async () => {
+    const { saveSession, loadSession } = await persistence();
+    saveSession(runScenario("dns-failure", 60));
+
+    const raw = JSON.parse(storage.getItem("techops.session.v1")!);
+    raw.sim.incidents[0].startedAtTick = "not a number";
+    raw.sim.incidents[0].recoveryStartedAtElapsed = "also not";
+    storage.setItem("techops.session.v1", JSON.stringify(raw));
+
+    const restored = loadSession(createInitialState(EPOCH))!;
+    expect(restored.incidents[0].startedAtTick).toBe(0);
+    expect(restored.incidents[0].recoveryStartedAtElapsed).toBeNull();
+
+    const frame = replayIncidentAt(restored.incidents[0], 30);
+    expect(Number.isFinite(frame.services["api-gateway"].metrics.latencyMs ?? NaN)).toBe(true);
+  });
+
+  it("replay is defensive even if a bad incident reaches it directly", () => {
+    const incident = runScenario("dns-failure", 40).incidents[0];
+    for (const bad of [NaN, Infinity, "x" as unknown as number, -1]) {
+      const frame = replayIncidentAt({ ...incident, startedAtTick: bad }, 20);
+      expect(Number.isFinite(frame.services["primary-db"].metrics.cpu ?? NaN)).toBe(true);
+    }
+    // A non-finite scrub position clamps rather than producing NaN.
+    expect(replayIncidentAt(incident, NaN).elapsed).toBe(0);
   });
 });

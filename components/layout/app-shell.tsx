@@ -8,6 +8,7 @@ import { useSimStore } from "@/lib/store/sim-store";
 import { CommandPalette } from "./command-palette";
 import { Onboarding } from "./onboarding";
 import { Sidebar } from "./sidebar";
+import { ThemeApplier } from "./theme-applier";
 import { ToastViewport } from "./toasts";
 import { Topbar } from "./topbar";
 
@@ -187,6 +188,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="relative flex min-h-dvh">
+      <ThemeApplier />
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[200] focus:rounded-md focus:bg-accent focus:px-3 focus:py-2 focus:text-[13px] focus:font-medium focus:text-white"
@@ -205,6 +207,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           onOpenMobileNav={() => setMobileNavOpen(true)}
           soundEnabled={prefs.soundEnabled}
           onToggleSound={() => update({ soundEnabled: !prefs.soundEnabled })}
+          theme={prefs.theme}
+          onToggleTheme={() => update({ theme: prefs.theme === "light" ? "dark" : "light" })}
         />
         <main id="main" className="min-w-0 flex-1 px-3 py-4 sm:px-4 sm:py-5 lg:px-6">
           {children}

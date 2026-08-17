@@ -6,7 +6,7 @@ import { statusRank } from "@/lib/sim/metrics";
 import { SERVICES, TOPOLOGY_LAYOUT } from "@/lib/sim/services";
 import { useSimStore } from "@/lib/store/sim-store";
 import { Beacon } from "@/components/ui/primitives";
-import type { HealthStatus, ServiceId } from "@/lib/sim/types";
+import type { HealthStatus, ServiceId, ServiceRuntime } from "@/lib/sim/types";
 
 /**
  * Infrastructure topology.
@@ -50,13 +50,20 @@ export function TopologyMap({
   onSelect,
   compact = false,
   className,
+  services: servicesOverride,
 }: {
   selected?: ServiceId | null;
   onSelect?: (id: ServiceId) => void;
   compact?: boolean;
   className?: string;
+  /**
+   * Render a supplied set of service states instead of the live ones. Used by
+   * replay, where the frame comes from a reconstructed past moment.
+   */
+  services?: Record<ServiceId, ServiceRuntime>;
 }) {
-  const services = useSimStore((s) => s.state.services);
+  const liveServices = useSimStore((s) => s.state.services);
+  const services = servicesOverride ?? liveServices;
 
   // Edge health is the worse of its two endpoints — a connection is only as
   // good as the service answering on it.

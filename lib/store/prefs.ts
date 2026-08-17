@@ -23,6 +23,8 @@ export interface Preferences {
   reducedChrome: boolean;
   /** Guided mode: surfaces progressive hints during an investigation. */
   guidedMode: boolean;
+  /** Dark is the default and the product's identity; light is opt-in. */
+  theme: "dark" | "light";
   results: StoredResult[];
 }
 
@@ -32,6 +34,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   reducedChrome: false,
   // Off by default: an experienced visitor should not be handed the answer.
   guidedMode: false,
+  theme: "dark",
   results: [],
 };
 
@@ -89,6 +92,7 @@ function parse(raw: string | null): Preferences {
       soundEnabled: parsed.soundEnabled === true,
       reducedChrome: parsed.reducedChrome === true,
       guidedMode: parsed.guidedMode === true,
+      theme: parsed.theme === "light" ? "light" : "dark",
       results: Array.isArray(parsed.results) ? parsed.results.filter(isStoredResult) : [],
     };
   } catch {
@@ -138,10 +142,17 @@ function write(next: Preferences): void {
   initialised = true;
   try {
     // `loaded` is transient render state, not a preference — never persist it.
-    const { onboardingDismissed, soundEnabled, reducedChrome, guidedMode, results } = next;
+    const { onboardingDismissed, soundEnabled, reducedChrome, guidedMode, theme, results } = next;
     window.localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ onboardingDismissed, soundEnabled, reducedChrome, guidedMode, results }),
+      JSON.stringify({
+        onboardingDismissed,
+        soundEnabled,
+        reducedChrome,
+        guidedMode,
+        theme,
+        results,
+      }),
     );
   } catch {
     // Quota or private browsing — the value still applies for this session.

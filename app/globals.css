@@ -24,7 +24,10 @@
   --color-ink: #e7ecf5;
   --color-ink-2: #a3aec4;
   --color-ink-3: #6b7793;
-  --color-ink-4: #48536b;
+  /* Lifted from #48536b, which measured 2.43:1 on a panel — below even the
+     3:1 large-text floor. This clears 4.5:1 on the void and panel surfaces and
+     4.39:1 on the lightest raised surface. */
+  --color-ink-4: #7a869e;
 
   /* --- Status (reserved — never used as a categorical series) ---------- */
   --color-ok: #34d399;
@@ -68,6 +71,96 @@
 
   /* --- Radius ---------------------------------------------------------- */
   --radius-panel: 10px;
+}
+
+/* ============================================================================
+   Light theme
+   ----------------------------------------------------------------------------
+   Opt-in only. Dark stays the default regardless of OS preference, because the
+   operations-centre look is the product's identity and the first impression it
+   is meant to make — following prefers-color-scheme would hand half of all
+   visitors a different product than the one being shown off.
+
+   These are not inverted dark values. Status hues are re-picked to hold their
+   meaning against a light ground: the dark palette's greens and ambers are far
+   too pale on white to read as "healthy" and "warning".
+   ========================================================================= */
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-void: #f4f6f9;
+  --color-surface: #ffffff;
+  --color-surface-2: #fbfcfe;
+  --color-surface-3: #eff2f6;
+  --color-surface-4: #e2e7ee;
+
+  --color-line: #dde3ea;
+  --color-line-soft: #ebeff4;
+
+  --color-ink: #0f1520;
+  --color-ink-2: #384254;
+  --color-ink-3: #5b6577;
+  /* 4.91:1 on white — the light twin of the dark fix above. */
+  --color-ink-4: #697181;
+
+  /* Darkened so they carry the same weight on white that the originals do on
+     near-black. Each still passes 3:1 against its own surface. */
+  --color-ok: #0a7d55;
+  --color-warn: #9a6206;
+  --color-crit: #c0362c;
+  --color-idle: #6b7484;
+  --color-info: #0369a1;
+
+  --color-ok-dim: #e4f4ec;
+  --color-warn-dim: #fbf1de;
+  --color-crit-dim: #fceceb;
+  --color-info-dim: #e6f1fb;
+  --color-idle-dim: #eef1f5;
+
+  --color-accent: #2f5fe0;
+  --color-accent-2: #6244d6;
+  --color-accent-dim: #e8eefc;
+
+  /* The validated light column of the categorical palette. */
+  --color-series-1: #2a78d6;
+  --color-series-2: #eb6834;
+  --color-series-3: #1baf7a;
+  --color-series-4: #eda100;
+  --color-series-5: #e87ba4;
+  --color-series-6: #4a3aa7;
+
+  /* Sequential ramp reverses direction: light ground wants dark = more. */
+  --color-seq-1: #a8d3f0;
+  --color-seq-2: #3f8fc4;
+  --color-seq-3: #10456e;
+}
+
+/* Panels sit above the page rather than glowing on it. */
+:root[data-theme="light"] .panel {
+  background: linear-gradient(180deg, #ffffff 0%, var(--color-surface-2) 100%);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 8px 24px -16px rgba(16, 24, 40, 0.12);
+}
+
+:root[data-theme="light"] .panel-flush {
+  background: var(--color-surface);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+}
+
+/* The engineering grid needs to darken rather than lighten to stay visible. */
+:root[data-theme="light"] body::before {
+  background-image:
+    linear-gradient(to right, rgba(40, 60, 110, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(40, 60, 110, 0.055) 1px, transparent 1px);
+}
+
+/* The terminal and code blocks stay dark in both themes — a console that
+   turns white stops reading as a console. */
+:root[data-theme="light"] .terminal-surface {
+  background: #0b0f16;
 }
 
 /* ============================================================================

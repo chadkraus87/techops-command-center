@@ -5,9 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Menu,
+  Moon,
   Pause,
   Play,
   RotateCcw,
+  Sun,
   Volume2,
   VolumeX,
   Zap,
@@ -53,10 +55,14 @@ export function Topbar({
   onOpenMobileNav,
   soundEnabled,
   onToggleSound,
+  theme,
+  onToggleTheme,
 }: {
   onOpenMobileNav: () => void;
   soundEnabled: boolean;
   onToggleSound: () => void;
+  theme: "dark" | "light";
+  onToggleTheme: () => void;
 }) {
   const pathname = usePathname();
   const [confirmReset, setConfirmReset] = useState(false);
@@ -155,6 +161,17 @@ export function Topbar({
             aria-pressed={soundEnabled}
           >
             {soundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
+          </Button>
+        </Tooltip>
+
+        <Tooltip label={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleTheme}
+            aria-label={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
+          >
+            {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
           </Button>
         </Tooltip>
 

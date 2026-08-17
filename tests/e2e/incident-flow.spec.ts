@@ -288,3 +288,101 @@ test.describe("resilience", () => {
     expect(errors).toEqual([]);
   });
 });
+
+test.describe("guided mode", () => {
+  test("is off by default and reveals hints one at a time when enabled", async ({ page }) => {
+    await startScenario(page, "Database Connection Exhaustion");
+
+    // Off by default — an experienced visitor is not handed the answer.
+    const toggle = page.getByRole("switch");
+    await expect(toggle).toHaveAttribute("aria-checked", "false");
+    await expect(page.getByRole("button", { name: /Give me a hint/i })).toBeHidden();
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-checked", "true");
+
+    await page.getByRole("button", { name: /Give me a hint/i }).click();
+    await expect(page.getByText("1/3")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Next hint \(2 left\)/i })).toBeVisible();
+
+    // A hint must never contain the answer. Scoped to the revealed hint itself —
+    // a looser locator matches the whole page, where the diagnosis options
+    // legitimately list that text.
+    // .first(): the hint title also appears in the incident timeline.
+    const hintText =
+      (await page.getByText(/Follow the slowness downwards/i).first().textContent()) ?? "";
+    const hintBody = (await page.getByText(/walk down the stack/i).first().textContent()) ?? "";
+    expect(`${hintText} ${hintBody}`.toLowerCase()).not.toContain(
+      "database connection exhaustion",
+    );
+  });
+});
+
+test.describe("theme", () => {
+  test("toggles to light, persists, and keeps the terminal dark", async ({ page }) => {
+    await page.goto("/");
+    await dismissOnboarding(page);
+
+    // Dark is the default and needs no attribute.
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme", "light");
+
+    await page.getByRole("button", { name: /Switch to light theme/i }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+
+    // Survives a reload.
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+
+    // A console that turns white stops reading as a console.
+    await page.goto("/network");
+    const terminalBg = await page
+      .locator(".terminal-surface")
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+    const [r, g, b] = terminalBg.match(/\d+/g)!.slice(0, 3).map(Number);
+    expect(r + g + b, "terminal should stay dark in light mode").toBeLessThan(120);
+  });
+});
+
+test.describe("replay", () => {
+  test("scrubs a resolved incident from healthy to failing to recovered", async ({ page }) => {
+    await startScenario(page, "Third-Party Payment Provider Outage");
+    await page.getByRole("radio", { name: /Third-party provider outage/i }).click();
+    await page.getByRole("button", { name: "Submit diagnosis" }).click();
+    await page.getByRole("button", { name: /Fail over to the secondary payment provider/i }).click();
+    await expect(page.getByText("Incident resolved", { exact: true })).toBeVisible({
+      timeout: 90_000,
+    });
+
+    await page.goto("/incidents");
+    const slider = page.locator('input[type="range"][id^="replay-"]');
+    await expect(slider).toBeVisible();
+
+    /**
+     * Count topology nodes not labelled Healthy at the current position.
+     * Polled, because the slider change and React's re-render are not the same
+     * tick — reading immediately after `fill` races the reconstruction.
+     */
+    const countUnhealthy = () =>
+      page.evaluate(() => {
+        const panel = document
+          .querySelector('input[type="range"][id^="replay-"]')!
+          .closest(".panel")!;
+        // Scoped to the topology's list items — the panel's own controls
+        // ("Back to start", "Jump to end") also carry aria-labels.
+        return [...panel.querySelectorAll("ul li button[aria-label]")].filter(
+          (n) => !/Healthy$/.test(n.getAttribute("aria-label") ?? ""),
+        ).length;
+      });
+
+    const max = await slider.getAttribute("max");
+
+    await slider.fill("0");
+    await expect.poll(countUnhealthy).toBe(0);
+
+    await slider.fill("40");
+    await expect.poll(countUnhealthy).toBeGreaterThan(0);
+
+    await slider.fill(max!);
+    await expect.poll(countUnhealthy).toBe(0);
+  });
+});

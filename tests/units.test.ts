@@ -31,7 +31,16 @@ import {
 } from "@/lib/sim/scoring";
 import { dnsIsBroken, executeCommand, resolveTarget } from "@/lib/sim/network";
 import { ticketRateForTick } from "@/lib/sim/tickets";
-import { createInitialState, revealHint, startScenario, tick } from "@/lib/sim/engine";
+import {
+  abortScenario,
+  applyRemediation,
+  createInitialState,
+  replayDuration,
+  replayIncidentAt,
+  revealHint,
+  startScenario,
+  tick,
+} from "@/lib/sim/engine";
 import { getScenario, SCENARIOS } from "@/lib/sim/scenarios";
 import { getService, TOPO_ORDER, dependentsOf } from "@/lib/sim/services";
 import { buildSeries, trendOf } from "@/lib/sim/history";
@@ -361,6 +370,8 @@ describe("scoring", () => {
       status: "resolved",
       startedAt: EPOCH,
       resolvedAt: EPOCH + 120_000,
+      startedAtTick: 0,
+      recoveryStartedAtElapsed: 90,
       affectedServices: [],
       customerImpact: "",
       timeline: [],
@@ -407,6 +418,8 @@ describe("scoring", () => {
       status: "resolved",
       startedAt: EPOCH,
       resolvedAt: EPOCH + 900_000,
+      startedAtTick: 0,
+      recoveryStartedAtElapsed: null,
       affectedServices: [],
       customerImpact: "",
       timeline: [],
@@ -660,6 +673,8 @@ describe("hardening against tampered state", () => {
     status: "resolved",
     startedAt: EPOCH,
     resolvedAt: EPOCH + 120_000,
+    startedAtTick: 0,
+    recoveryStartedAtElapsed: 90,
     affectedServices: [],
     customerImpact: "",
     timeline: [],
@@ -704,5 +719,111 @@ describe("hardening against tampered state", () => {
     };
     // "2" + 1 would be "21" without the guard.
     expect(revealHint(state).incidents[0].investigation.hintsRevealed).toBe(3);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe("incident replay", () => {
+  /** Run a scenario to resolution so there is a complete incident to replay. */
+  function resolvedRun() {
+    let state = startScenario(createInitialState(EPOCH), "dns-failure");
+    state = advance(state, 60);
+    state = applyRemediation(state, "restore-dns-zone").state;
+    state = advance(state, 20);
+    state = applyRemediation(state, "flush-resolver-cache").state;
+    state = advance(state, 140);
+    return state;
+  }
+
+  it("records the two facts replay needs", () => {
+    const state = resolvedRun();
+    const incident = state.incidents[0];
+    expect(incident.startedAtTick).toBe(0);
+    expect(incident.recoveryStartedAtElapsed).not.toBeNull();
+    expect(incident.status).toBe("resolved");
+  });
+
+  it("reconstructs a healthy environment at T+0", () => {
+    const incident = resolvedRun().incidents[0];
+    const frame = replayIncidentAt(incident, 0);
+    expect(Object.values(frame.services).every((s) => s.status === "healthy")).toBe(true);
+    // Detection is logged at T+0, so exactly that one event is visible.
+    expect(frame.events).toHaveLength(1);
+    expect(frame.events[0].kind).toBe("detection");
+  });
+
+  it("reconstructs the failure at its peak", () => {
+    const incident = resolvedRun().incidents[0];
+    const frame = replayIncidentAt(incident, 55);
+
+    // The resolver is broken and the data tier is not — the scenario's signature.
+    expect(frame.services["dns-resolver"].metrics.errorRate ?? 0).toBeGreaterThan(0.5);
+    expect(frame.services["primary-db"].status).toBe("healthy");
+    expect(frame.services["api-gateway"].status).not.toBe("healthy");
+  });
+
+  it("reconstructs recovery at the end", () => {
+    const incident = resolvedRun().incidents[0];
+    const frame = replayIncidentAt(incident, replayDuration(incident));
+    expect(Object.values(frame.services).every((s) => s.status === "healthy")).toBe(true);
+  });
+
+  it("matches what actually happened at the same moment", () => {
+    // The load-bearing property: a reconstructed frame must equal the live
+    // state, or replay would be showing a plausible fiction.
+    let live = startScenario(createInitialState(EPOCH), "database-overload");
+    live = advance(live, 70);
+    const incident = live.incidents[0];
+
+    const frame = replayIncidentAt(incident, 70);
+
+    for (const id of Object.keys(live.services) as Array<keyof typeof live.services>) {
+      expect(frame.services[id].status, id).toBe(live.services[id].status);
+      expect(frame.services[id].metrics.errorRate ?? 0, id).toBeCloseTo(
+        live.services[id].metrics.errorRate ?? 0,
+        6,
+      );
+      expect(frame.services[id].metrics.latencyMs ?? 0, id).toBeCloseTo(
+        live.services[id].metrics.latencyMs ?? 0,
+        6,
+      );
+    }
+  });
+
+  it("reveals timeline events progressively", () => {
+    const incident = resolvedRun().incidents[0];
+    const early = replayIncidentAt(incident, 5).events.length;
+    const mid = replayIncidentAt(incident, 90).events.length;
+    const end = replayIncidentAt(incident, replayDuration(incident)).events.length;
+
+    expect(early).toBeLessThan(mid);
+    expect(mid).toBeLessThanOrEqual(end);
+    expect(end).toBe(incident.timeline.length);
+  });
+
+  it("clamps a negative position rather than extrapolating", () => {
+    const incident = resolvedRun().incidents[0];
+    expect(replayIncidentAt(incident, -50).elapsed).toBe(0);
+  });
+
+  it("is deterministic — the same position always rebuilds identically", () => {
+    const incident = resolvedRun().incidents[0];
+    expect(replayIncidentAt(incident, 42).services).toEqual(
+      replayIncidentAt(incident, 42).services,
+    );
+  });
+
+  it("gives an abandoned incident a replayable duration", () => {
+    let state = startScenario(createInitialState(EPOCH), "redis-failure");
+    state = advance(state, 40);
+    state = abortScenario(state);
+    const incident = state.incidents[0];
+
+    expect(incident.recoveryStartedAtElapsed).toBeNull();
+    expect(replayDuration(incident)).toBeGreaterThan(0);
+    // Impacts never unwind, so the failure is still visible at the end.
+    const frame = replayIncidentAt(incident, 40);
+    expect(frame.services["redis-cache"].status).not.toBe("healthy");
   });
 });

@@ -9,6 +9,7 @@ import { getScenario } from "@/lib/sim/scenarios";
 import { scoreIncident } from "@/lib/sim/scoring";
 import { serviceName } from "@/lib/sim/services";
 import { useSimStore } from "@/lib/store/sim-store";
+import { IncidentReplay } from "@/components/incidents/incident-replay";
 import { IncidentTimeline } from "@/components/incidents/incident-timeline";
 import { PageIntro } from "@/components/ui/page-intro";
 import {
@@ -276,6 +277,8 @@ function IncidentsContent() {
                 </div>
               )}
             </Panel>
+
+            {selected.status === "resolved" ? <IncidentReplay incident={selected} /> : null}
 
             <Panel>
               <PanelHeader
