@@ -80,7 +80,7 @@ evidence that mattered.
   dependency cascades, tail-latency behaviour under saturation, and incident
   management workflow
 - **Testing** — 159 unit tests over a pure, deterministic simulation engine, plus
-  28 Playwright end-to-end tests across desktop, tablet and mobile
+  32 Playwright end-to-end tests across desktop, tablet and mobile
 
 ---
 
@@ -136,7 +136,13 @@ evidence that mattered.
 - **Light theme** — opt-in, not an inversion. Status hues are re-picked so they
   hold their meaning on a light ground, and the terminal stays dark because a
   console that turns white stops reading as a console. Dark remains the default
-  regardless of OS preference: it is the product's identity.
+  regardless of OS preference: it is the product's identity. The toggle is the
+  sun/moon button in the top bar, between the sound and reset controls; the
+  choice persists in `localStorage`.
+- **Tooltips are keyboard-first** — the top-bar controls reveal their labels on
+  hover or on `:focus-visible`, deliberately not on `:focus`. Clicking a button
+  focuses it, and a focus-driven tooltip would stay pinned open over the page
+  after the pointer moved away.
 
 ### Session handling
 - **Reload-safe** — an incident you are three minutes into investigating survives
@@ -364,7 +370,7 @@ Open <http://localhost:3000>.
 ```bash
 npm test           # 159 unit tests over the simulation engine
 npm run test:watch # watch mode
-npm run test:e2e   # 28 Playwright tests against a production build
+npm run test:e2e   # 32 Playwright tests against a production build
 ```
 
 **Unit tests (Vitest, 159)** cover incident state transitions, metric ramp and
@@ -373,7 +379,7 @@ evaluation windows, diagnosis and scoring, remediation gating, session
 persistence, guided-mode hints, shared-link encoding, incident replay, the
 network tools, and the determinism guarantee itself.
 
-**End-to-end tests (Playwright, 28)** deliberately do *not* re-assert simulation
+**End-to-end tests (Playwright, 32)** deliberately do *not* re-assert simulation
 behaviour — the unit tests own that. They cover the one thing unit tests cannot:
 that a person can actually work an incident in a browser. They run against a
 production build, because dev-only React behaviour has masked real bugs here
@@ -453,7 +459,7 @@ app/                       Routes (one directory per section)
   about/                   Portfolio write-up
 
 components/
-  layout/                  Shell, sidebar, topbar, command palette, toasts
+  layout/                  Shell, sidebar, topbar, command palette, toasts, theme
   ui/                      Panel, Button, Modal, Drawer, badges, primitives
   charts/                  Time-series, multi-line, sparkline, stat tile
   dashboard/               Hero status, activity feed

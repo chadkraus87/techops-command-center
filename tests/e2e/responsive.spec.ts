@@ -154,30 +154,60 @@ test("topbar tooltips stay inside the frame", async ({ page }) => {
   const count = await controls.count();
   expect(count).toBeGreaterThan(2);
 
+  const viewport = page.viewportSize()!;
+
   for (let i = 0; i < count; i++) {
     const control = controls.nth(i);
     const label = await control.getAttribute("aria-label");
-    // focus() rather than hover(): the mobile project emulates touch, where no
-    // :hover state exists at all. Focus reveals the same tooltip and is the
-    // path a keyboard user actually takes.
-    await control.focus();
-
     const tip = control.locator("xpath=../*[@role='tooltip']");
     if ((await tip.count()) === 0) continue;
-    await expect(tip).toBeVisible();
 
-    const box = await tip.boundingBox();
-    expect(box, `no box for ${label}`).not.toBeNull();
+    // Measured with the bubble force-shown rather than hovered: the mobile
+    // project emulates touch (no :hover at all) and tooltips are deliberately
+    // keyboard-only otherwise, but the geometry under test is the same either
+    // way. Dismissal behaviour is covered separately below.
+    const box = await tip.evaluate((el) => {
+      el.classList.remove("hidden");
+      const r = el.getBoundingClientRect();
+      el.classList.add("hidden");
+      return { x: r.x, y: r.y, width: r.width };
+    });
 
-    const viewport = page.viewportSize()!;
     // The header sits flush against the top of the window, so a tooltip that
-    // opens upward escapes the frame entirely — invisible on a desktop check
-    // because the browser simply clips it.
-    expect(box!.y, `${label} tooltip above the frame`).toBeGreaterThanOrEqual(0);
-    expect(box!.x, `${label} tooltip past the left edge`).toBeGreaterThanOrEqual(0);
-    expect(
-      box!.x + box!.width,
-      `${label} tooltip past the right edge`,
-    ).toBeLessThanOrEqual(viewport.width);
+    // opens upward escapes the frame entirely — invisible to a screenshot
+    // check because the browser simply clips it.
+    expect(box.y, `${label} tooltip above the frame`).toBeGreaterThanOrEqual(0);
+    expect(box.x, `${label} tooltip past the left edge`).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width, `${label} tooltip past the right edge`).toBeLessThanOrEqual(
+      viewport.width,
+    );
   }
+});
+
+test("a clicked topbar control does not strand its tooltip", async ({ page }) => {
+  await page.goto("/");
+  await dismissOnboarding(page);
+
+  const hasHover = await page.evaluate(() => matchMedia("(hover: hover)").matches);
+  test.skip(!hasHover, "no pointer hover on this device");
+
+  const control = page.locator("header button[aria-label*='theme']").first();
+  const tip = control.locator("xpath=../*[@role='tooltip']");
+
+  await control.hover();
+  await expect(tip).toBeVisible();
+
+  // Clicking focuses the button. Under :focus-within the tooltip stayed pinned
+  // open after the pointer left, covering the content beneath it.
+  await control.click();
+  await page.mouse.move(400, 400);
+  await expect(tip).toBeHidden();
+
+  // ...but it must still be reachable without a mouse.
+  await control.evaluate((el: HTMLElement) => el.blur());
+  await page.keyboard.press("Tab");
+  const reachedByKeyboard = await page.evaluate(() =>
+    document.activeElement?.matches(":focus-visible"),
+  );
+  expect(reachedByKeyboard, "keyboard focus lost its focus-visible ring").toBe(true);
 });

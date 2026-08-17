@@ -373,7 +373,13 @@ export function Tooltip({
         role="tooltip"
         className={cx(
           "anim-fade-in pointer-events-none absolute z-50 hidden whitespace-nowrap rounded border border-line bg-surface-4 px-2 py-1 text-[11px] text-ink shadow-lg",
-          "group-hover/tip:block group-focus-within/tip:block",
+          /*
+            :focus-visible, not :focus-within. A mouse click focuses the button,
+            so focus-within left the tooltip pinned open after the pointer moved
+            away. focus-visible fires only for keyboard focus, which keeps the
+            tooltip discoverable by tab without stranding it after a click.
+          */
+          "group-hover/tip:block group-has-[:focus-visible]/tip:block",
           side === "top" ? "bottom-full mb-1.5" : "top-full mt-1.5",
           align === "center" && "left-1/2 -translate-x-1/2",
           align === "start" && "left-0",
