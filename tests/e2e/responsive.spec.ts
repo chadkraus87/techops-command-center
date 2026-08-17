@@ -145,3 +145,39 @@ test.describe("header fits its viewport", () => {
     }
   });
 });
+
+test("topbar tooltips stay inside the frame", async ({ page }) => {
+  await page.goto("/");
+  await dismissOnboarding(page);
+
+  const controls = page.locator("header button[aria-label]");
+  const count = await controls.count();
+  expect(count).toBeGreaterThan(2);
+
+  for (let i = 0; i < count; i++) {
+    const control = controls.nth(i);
+    const label = await control.getAttribute("aria-label");
+    // focus() rather than hover(): the mobile project emulates touch, where no
+    // :hover state exists at all. Focus reveals the same tooltip and is the
+    // path a keyboard user actually takes.
+    await control.focus();
+
+    const tip = control.locator("xpath=../*[@role='tooltip']");
+    if ((await tip.count()) === 0) continue;
+    await expect(tip).toBeVisible();
+
+    const box = await tip.boundingBox();
+    expect(box, `no box for ${label}`).not.toBeNull();
+
+    const viewport = page.viewportSize()!;
+    // The header sits flush against the top of the window, so a tooltip that
+    // opens upward escapes the frame entirely — invisible on a desktop check
+    // because the browser simply clips it.
+    expect(box!.y, `${label} tooltip above the frame`).toBeGreaterThanOrEqual(0);
+    expect(box!.x, `${label} tooltip past the left edge`).toBeGreaterThanOrEqual(0);
+    expect(
+      box!.x + box!.width,
+      `${label} tooltip past the right edge`,
+    ).toBeLessThanOrEqual(viewport.width);
+  }
+});

@@ -347,10 +347,18 @@ export function Tooltip({
   label,
   children,
   side = "top",
+  align = "center",
 }: {
   label: string;
   children: ReactNode;
   side?: "top" | "bottom";
+  /**
+   * Which edge the bubble hangs from. A centred tooltip on a control near the
+   * viewport edge overhangs by half its own width, which is invisible on a wide
+   * screen and 27px of clipped text on a phone. `end` pins it to the trigger's
+   * right edge so it can only grow inwards.
+   */
+  align?: "center" | "start" | "end";
 }) {
   return (
     <span className="group/tip relative inline-flex">
@@ -364,9 +372,12 @@ export function Tooltip({
       <span
         role="tooltip"
         className={cx(
-          "anim-fade-in pointer-events-none absolute left-1/2 z-50 hidden -translate-x-1/2 whitespace-nowrap rounded border border-line bg-surface-4 px-2 py-1 text-[11px] text-ink shadow-lg",
+          "anim-fade-in pointer-events-none absolute z-50 hidden whitespace-nowrap rounded border border-line bg-surface-4 px-2 py-1 text-[11px] text-ink shadow-lg",
           "group-hover/tip:block group-focus-within/tip:block",
           side === "top" ? "bottom-full mb-1.5" : "top-full mt-1.5",
+          align === "center" && "left-1/2 -translate-x-1/2",
+          align === "start" && "left-0",
+          align === "end" && "right-0",
         )}
       >
         {label}

@@ -129,7 +129,7 @@ export function Topbar({
 
       {/* Clock controls */}
       <div className="flex shrink-0 items-center gap-1.5 border-l border-line pl-3">
-        <Tooltip label={running ? "Pause simulation" : "Resume simulation"}>
+        <Tooltip label={running ? "Pause simulation" : "Resume simulation"} side="bottom">
           <Button
             variant="ghost"
             size="sm"
@@ -152,7 +152,7 @@ export function Topbar({
           ]}
         />
 
-        <Tooltip label={soundEnabled ? "Mute alert sounds" : "Enable alert sounds"}>
+        <Tooltip label={soundEnabled ? "Mute alert sounds" : "Enable alert sounds"} side="bottom">
           <Button
             variant="ghost"
             size="sm"
@@ -164,7 +164,7 @@ export function Topbar({
           </Button>
         </Tooltip>
 
-        <Tooltip label={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}>
+        <Tooltip label={theme === "light" ? "Switch to dark theme" : "Switch to light theme"} side="bottom" align="end">
           <Button
             variant="ghost"
             size="sm"
@@ -175,7 +175,7 @@ export function Topbar({
           </Button>
         </Tooltip>
 
-        <Tooltip label="Reset environment">
+        <Tooltip label="Reset environment" side="bottom" align="end">
           <Button
             variant="ghost"
             size="sm"
