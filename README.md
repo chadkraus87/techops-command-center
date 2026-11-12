@@ -352,7 +352,7 @@ regardless, this is a deliberate choice rather than an oversight.
 ### Installation
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/chadkraus87/techops-command-center.git
 cd techops-command-center
 npm install
 ```
