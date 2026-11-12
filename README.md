@@ -545,5 +545,5 @@ scripts/demo-gif.mjs       Records the README demo GIF, driving a live incident
 
 ## Licence
 
-Provided as a portfolio demonstration. Meridian Cloud, its services, customers
-and data are entirely fictional.
+Released under the [MIT License](LICENSE). Meridian Cloud, its services,
+customers and data are entirely fictional.
