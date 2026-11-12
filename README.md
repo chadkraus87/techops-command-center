@@ -27,6 +27,10 @@ dependency map, and confirmed with the network tools.
 
 ![TechOps Command Center demo: triggering a DNS incident, watching it spread, and diagnosing it](docs/demo.gif)
 
+**Read the write-up:** [Postmortem: DNS resolution failure](docs/postmortem-dns-resolution-failure.md).
+The same incident, written up the way I'd write one at work: impact, timeline, what I ruled
+out, root cause, fix and prevention.
+
 ---
 
 ## Screenshots
