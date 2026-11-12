@@ -31,6 +31,9 @@ dependency map, and confirmed with the network tools.
 The same incident, written up the way I'd write one at work: impact, timeline, what I ruled
 out, root cause, fix and prevention.
 
+For the support side, there's also a sample [Tier 2 escalation](docs/escalation-payment-provider-outage.md)
+from the payment provider outage scenario.
+
 ---
 
 ## Screenshots
