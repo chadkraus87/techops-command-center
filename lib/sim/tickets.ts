@@ -76,11 +76,11 @@ export interface TicketGenerationInput {
   scenarioId?: ScenarioId;
 }
 
-/** Meridian Triage, the AI triage agent for the same fictional company, replays a recorded triage of every scenario ticket. */
-export const MERIDIAN_TRIAGE_URL = "https://meridian-triage.vercel.app";
+/** Switchboard, the AI triage agent for the same fictional company, replays a recorded triage of every scenario ticket. */
+export const SWITCHBOARD_URL = "https://switchboard-triage.vercel.app";
 
-export function meridianTriageHref(source: NonNullable<SupportTicket["source"]>): string {
-  return `${MERIDIAN_TRIAGE_URL}/techops/${source.scenarioId}/${source.templateIndex + 1}`;
+export function switchboardHref(source: NonNullable<SupportTicket["source"]>): string {
+  return `${SWITCHBOARD_URL}/techops/${source.scenarioId}/${source.templateIndex + 1}`;
 }
 
 /** Generate zero or more tickets for this tick. Deterministic. */

@@ -48,7 +48,7 @@ export default function InfrastructurePage() {
     <div className="mx-auto flex max-w-[1600px] flex-col gap-4">
       <PageIntro
         title="Infrastructure Topology"
-        description="The live dependency graph for Meridian Cloud. Edge colour follows the health of the services it connects, and selecting a node isolates its blast radius."
+        description="The live dependency graph for Vantimere Cloud. Edge colour follows the health of the services it connects, and selecting a node isolates its blast radius."
         actions={
           focused ? (
             <Button variant="secondary" size="sm" onClick={() => setFocused(null)}>

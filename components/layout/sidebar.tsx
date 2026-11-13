@@ -183,7 +183,7 @@ export function Sidebar({
             </span>
           </div>
           <p className="mt-1 text-[10px] leading-tight text-ink-4">
-            Meridian Cloud · us-east-1
+            Vantimere Cloud · us-east-1
           </p>
         </div>
       </nav>

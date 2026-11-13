@@ -3,7 +3,7 @@
 > **This is a simulated escalation, not a real one.** It is written from the
 > Third-Party Payment Provider Outage scenario in
 > [TechOps Command Center](../README.md), an incident-response simulator I
-> built. Meridian Cloud, Paycrest, the customers and their tickets are
+> built. Vantimere Cloud, Paycrest, the customers and their tickets are
 > fictional. All times are the simulator's clock, from one run of the scenario
 > at normal (1x) speed.
 

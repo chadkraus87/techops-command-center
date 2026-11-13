@@ -35,7 +35,7 @@ import type { TerminalLine } from "@/lib/sim/types";
 
 const SUGGESTED = [
   "ping api.internal",
-  "dig customer-api.internal.meridian.example",
+  "dig customer-api.internal.vantimere.example",
   "traceroute db.internal",
   "nc cache.internal 6379",
   "curl api.internal",
@@ -47,7 +47,7 @@ export default function NetworkPage() {
   const noteEvidence = useSimStore((s) => s.noteEvidence);
 
   const [lines, setLines] = useState<TerminalLine[]>(() => [
-    makeLine("Meridian Cloud network diagnostics v2.4", "muted"),
+    makeLine("Vantimere Cloud network diagnostics v2.4", "muted"),
     makeLine("Simulated environment — no real network traffic is generated.", "muted"),
     makeLine("Type 'help' for available commands.", "muted"),
     makeLine("", "muted"),
@@ -75,7 +75,7 @@ export default function NetworkPage() {
     } else {
       setLines((current) => [
         ...current,
-        makeLine(`ops@meridian:~$ ${trimmed}`, "input"),
+        makeLine(`ops@vantimere:~$ ${trimmed}`, "input"),
         ...result.lines,
         makeLine("", "muted"),
       ]);
@@ -179,7 +179,7 @@ export default function NetworkPage() {
             title={
               <span className="flex items-center gap-2">
                 <TerminalIcon size={13} className="text-ok" />
-                ops@meridian
+                ops@vantimere
               </span>
             }
             subtitle="Simulated diagnostics — ping, dig, traceroute, nc, curl"
@@ -227,7 +227,7 @@ export default function NetworkPage() {
               Terminal command
             </label>
             <span className="shrink-0 font-mono text-[11.5px] text-ok" aria-hidden="true">
-              ops@meridian:~$
+              ops@vantimere:~$
             </span>
             <input
               id="terminal-input"

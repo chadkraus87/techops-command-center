@@ -10,7 +10,7 @@ thoroughness and restraint.
 
 No account. No backend. No paid services. Open it and start clicking.
 
-> **Meridian Cloud is fictional.** Every service, metric, log line, customer and
+> **Vantimere Cloud is fictional.** Every service, metric, log line, customer and
 > ticket in this application is simulated. No real infrastructure is contacted.
 
 ---
@@ -545,5 +545,5 @@ scripts/demo-gif.mjs       Records the README demo GIF, driving a live incident
 
 ## Licence
 
-Released under the [MIT License](LICENSE). Meridian Cloud, its services,
+Released under the [MIT License](LICENSE). Vantimere Cloud, its services,
 customers and data are entirely fictional.

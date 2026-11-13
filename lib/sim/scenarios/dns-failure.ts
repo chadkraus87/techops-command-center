@@ -61,16 +61,16 @@ export const dnsFailure: Scenario = {
     {
       service: "dns-resolver",
       level: "ERROR",
-      message: "SERVFAIL for query customer-api.internal.meridian.example. IN A from 10.20.12.44",
+      message: "SERVFAIL for query customer-api.internal.vantimere.example. IN A from 10.20.12.44",
       weight: 10,
-      fields: { qtype: "A", rcode: "SERVFAIL", zone: "internal.meridian.example" },
+      fields: { qtype: "A", rcode: "SERVFAIL", zone: "internal.vantimere.example" },
     },
     {
       service: "dns-resolver",
       level: "ERROR",
-      message: "zone internal.meridian.example: no valid records loaded, serial 2026081101 rejected",
+      message: "zone internal.vantimere.example: no valid records loaded, serial 2026081101 rejected",
       weight: 4,
-      fields: { zone: "internal.meridian.example", serial: 2026081101 },
+      fields: { zone: "internal.vantimere.example", serial: 2026081101 },
     },
     {
       service: "dns-resolver",
@@ -82,7 +82,7 @@ export const dnsFailure: Scenario = {
       service: "api-gateway",
       level: "ERROR",
       message:
-        "dial tcp: lookup customer-api.internal.meridian.example on 10.20.0.53:53: server misbehaving",
+        "dial tcp: lookup customer-api.internal.vantimere.example on 10.20.0.53:53: server misbehaving",
       weight: 9,
       fields: { upstream: "customer-api", resolver: "10.20.0.53" },
     },
@@ -96,14 +96,14 @@ export const dnsFailure: Scenario = {
     {
       service: "web-frontend",
       level: "ERROR",
-      message: "getaddrinfo EAI_AGAIN api-01.internal.meridian.example",
+      message: "getaddrinfo EAI_AGAIN api-01.internal.vantimere.example",
       weight: 7,
       fields: { errno: -3001, syscall: "getaddrinfo" },
     },
     {
       service: "identity-service",
       level: "ERROR",
-      message: "failed to resolve pg-primary-01.internal.meridian.example: no such host",
+      message: "failed to resolve pg-primary-01.internal.vantimere.example: no such host",
       weight: 6,
     },
     {
@@ -123,7 +123,7 @@ export const dnsFailure: Scenario = {
     {
       service: "media-service",
       level: "ERROR",
-      message: "asset signing failed: DNS lookup for cdn.meridian.example returned no answer",
+      message: "asset signing failed: DNS lookup for cdn.vantimere.example returned no answer",
       weight: 4,
     },
     {
@@ -158,7 +158,7 @@ export const dnsFailure: Scenario = {
     },
     {
       subject: "API requests timing out from our integration",
-      body: "Our nightly sync job is failing with connection errors against api.meridian.example. We're seeing 503s on roughly every request.",
+      body: "Our nightly sync job is failing with connection errors against api.vantimere.example. We're seeing 503s on roughly every request.",
       priority: "high",
       affectedService: "api-gateway",
       suggestedSteps: [
@@ -225,7 +225,7 @@ export const dnsFailure: Scenario = {
     {
       id: "restore-dns-zone",
       label: "Restore DNS zone configuration",
-      description: "Roll the internal.meridian.example zone back to the last known-good serial.",
+      description: "Roll the internal.vantimere.example zone back to the last known-good serial.",
       durationSeconds: 12,
       ineffectiveNote: "",
     },
@@ -274,7 +274,7 @@ export const dnsFailure: Scenario = {
   requiredRemediationIds: ["restore-dns-zone", "flush-resolver-cache"],
 
   rootCause:
-    "A zone-file deployment to the internal resolvers removed the A records for internal.meridian.example. The resolvers loaded the malformed zone, rejected the new serial, and began answering SERVFAIL for every internal hostname. Every service-to-service call failed at name resolution, before a single packet was sent.",
+    "A zone-file deployment to the internal resolvers removed the A records for internal.vantimere.example. The resolvers loaded the malformed zone, rejected the new serial, and began answering SERVFAIL for every internal hostname. Every service-to-service call failed at name resolution, before a single packet was sent.",
   resolution:
     "The zone was rolled back to the previous known-good serial and negative caches were flushed across all resolvers. Name resolution recovered immediately and dependent services drained their retry backlogs over the following minute.",
 

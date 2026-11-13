@@ -2,7 +2,7 @@
 
 > **This is a simulated incident, not a real outage.** It is a postmortem of the
 > DNS Resolution Failure scenario in [TechOps Command Center](../README.md), an
-> incident-response simulator I built. Meridian Cloud, its services, staff and
+> incident-response simulator I built. Vantimere Cloud, its services, staff and
 > customers are fictional. No real systems or people were affected. All times
 > are the simulator's clock, from one run of the scenario at normal (1x) speed.
 
@@ -17,7 +17,7 @@
 ## Summary
 
 Internal name resolution failed across production. The internal resolvers
-started answering SERVFAIL for every `internal.meridian.example` hostname, so
+started answering SERVFAIL for every `internal.vantimere.example` hostname, so
 services could no longer find each other even though every host was up.
 Customer-facing traffic failed across the dashboard, sign-in, checkout and
 media. The data tier stayed healthy throughout.
@@ -68,7 +68,7 @@ service, and the incident was resolved at 1m 54s.
 | 14:02:54 | 0:51 | `traceroute 10.20.12.44` completes in 4 clean hops. |
 | 14:02:57 | 0:54 | `curl https://api.internal/health` fails: could not resolve host. |
 | 14:02:58 | 0:55 | Diagnosis submitted and confirmed: DNS resolution failure. |
-| 14:02:58 | 0:55 | Started rollback of the `internal.meridian.example` zone to last known-good. |
+| 14:02:58 | 0:55 | Started rollback of the `internal.vantimere.example` zone to last known-good. |
 | 14:03:10 | 1:07 | Zone rollback complete. Started flushing resolver caches. |
 | 14:03:57 | 1:54 | All services healthy. Incident resolved. |
 
@@ -94,9 +94,9 @@ service, and the incident was resolved at 1m 54s.
 
 What pointed to DNS:
 
-- The gateway logs said `lookup customer-api.internal.meridian.example on
+- The gateway logs said `lookup customer-api.internal.vantimere.example on
   10.20.0.53:53: server misbehaving`, and Identity said `failed to resolve
-  pg-primary-01.internal.meridian.example: no such host`. These are lookup failures,
+  pg-primary-01.internal.vantimere.example: no such host`. These are lookup failures,
   not timeouts or query errors.
 - `dig api.internal` returned `status: SERVFAIL` with no answer, from server
   `10.20.0.53`.
@@ -107,7 +107,7 @@ What pointed to DNS:
 ## Root cause
 
 A zone-file deployment to the internal resolvers removed the A records for
-`internal.meridian.example`. The resolvers loaded the bad zone and began answering
+`internal.vantimere.example`. The resolvers loaded the bad zone and began answering
 SERVFAIL for every internal hostname. Every service-to-service call failed at
 name resolution, before any traffic was sent. Because nearly every service
 looks up a hostname before it calls another one, the failure spread across the
@@ -115,7 +115,7 @@ platform within seconds.
 
 ## Fix
 
-1. Rolled the `internal.meridian.example` zone back to the last known-good version
+1. Rolled the `internal.vantimere.example` zone back to the last known-good version
    (12 seconds).
 2. Flushed the negative caches on all resolvers. Rolling back alone was not
    enough, because clients had cached the failed answers and would have kept

@@ -55,9 +55,9 @@ export const tlsExpiry: Scenario = {
       service: "load-balancer",
       level: "CRITICAL",
       message:
-        "TLS handshake failed: certificate has expired (notAfter=2026-08-11T13:00:00Z) for *.internal.meridian.example",
+        "TLS handshake failed: certificate has expired (notAfter=2026-08-11T13:00:00Z) for *.internal.vantimere.example",
       weight: 10,
-      fields: { notAfter: "2026-08-11T13:00:00Z", issuer: "Meridian Internal CA", serial: "3f:a2:91:0c" },
+      fields: { notAfter: "2026-08-11T13:00:00Z", issuer: "Vantimere Internal CA", serial: "3f:a2:91:0c" },
     },
     {
       service: "api-gateway",
@@ -190,7 +190,7 @@ export const tlsExpiry: Scenario = {
   requiredRemediationIds: ["renew-certificate", "reload-tls-config"],
 
   rootCause:
-    "The wildcard certificate for *.internal.meridian.example expired at 13:00 UTC. The ACME renewal job had been failing silently for 89 days because its credential had been rotated without updating the job, and the expiry alert was routed to a decommissioned channel. At the moment of expiry every mutually-authenticated hop in the service mesh began refusing connections.",
+    "The wildcard certificate for *.internal.vantimere.example expired at 13:00 UTC. The ACME renewal job had been failing silently for 89 days because its credential had been rotated without updating the job, and the expiry alert was routed to a decommissioned channel. At the moment of expiry every mutually-authenticated hop in the service mesh began refusing connections.",
   resolution:
     "A replacement certificate was issued from the internal CA and distributed to every terminating proxy, then the mesh was signalled to reload. Handshakes succeeded immediately and traffic recovered as clients retried. Follow-up: restore expiry alerting and fail the renewal job loudly.",
 

@@ -117,7 +117,7 @@ export default function AboutPage() {
         <div className="space-y-3 p-5 text-[13px] leading-relaxed text-ink-2">
           <p>
             The application simulates the production infrastructure of a fictional SaaS company,
-            Meridian Cloud: fifteen services across edge, network, application, platform and data
+            Vantimere Cloud: fifteen services across edge, network, application, platform and data
             tiers, with live metrics, structured logs, threshold alerting, a dependency map, an API
             monitor, a support queue and a release pipeline.
           </p>
@@ -264,7 +264,7 @@ export default function AboutPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-surface-2 px-5 py-4">
         <p className="text-[12.5px] text-ink-3">
-          Built by Chad Kraus. Meridian Cloud is fictional; all data is simulated.
+          Built by Chad Kraus. Vantimere Cloud is fictional; all data is simulated.
         </p>
         <Link
           href="/simulation"

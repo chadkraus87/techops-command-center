@@ -1,7 +1,7 @@
 import type { ApiEndpointDef, MetricKey, ServiceDef, ServiceId } from "./types";
 
 /**
- * The infrastructure of "Meridian Cloud", a fictional SaaS company.
+ * The infrastructure of "Vantimere Cloud", a fictional SaaS company.
  *
  * The dependency graph is the backbone of the whole simulation: it decides the
  * topology layout, how failures cascade, which services a scenario can plausibly
@@ -9,9 +9,9 @@ import type { ApiEndpointDef, MetricKey, ServiceDef, ServiceId } from "./types";
  */
 
 export const COMPANY = {
-  name: "Meridian Cloud",
-  domain: "meridian.example",
-  internalDomain: "internal.meridian.example",
+  name: "Vantimere Cloud",
+  domain: "vantimere.example",
+  internalDomain: "internal.vantimere.example",
   region: "us-east-1",
 } as const;
 
@@ -29,7 +29,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Network Engineering",
     version: "coredns-1.11.3",
     regions: ["us-east-1", "eu-west-1"],
-    hostname: "ns1.internal.meridian.example",
+    hostname: "ns1.internal.vantimere.example",
     ip: "10.20.0.53",
     customerFacing: false,
     baseline: { latencyMs: 8, rps: 900, errorRate: 0.0002, cpu: 12, memory: 28 },
@@ -47,7 +47,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Platform Infrastructure",
     version: "4.8.1",
     regions: ["global"],
-    hostname: "cdn.meridian.example",
+    hostname: "cdn.vantimere.example",
     ip: "10.20.1.20",
     customerFacing: true,
     baseline: { latencyMs: 12, rps: 2400, errorRate: 0.0008, cpu: 22, memory: 34, cacheHitRate: 0.96 },
@@ -64,7 +64,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Network Engineering",
     version: "envoy-1.31.0",
     regions: ["us-east-1", "eu-west-1"],
-    hostname: "lb-01.internal.meridian.example",
+    hostname: "lb-01.internal.vantimere.example",
     ip: "10.20.0.10",
     customerFacing: true,
     baseline: { latencyMs: 4, rps: 1800, errorRate: 0.001, cpu: 18, memory: 30 },
@@ -82,7 +82,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Product Engineering",
     version: "7.2.4",
     regions: ["us-east-1", "eu-west-1"],
-    hostname: "web-01.internal.meridian.example",
+    hostname: "web-01.internal.vantimere.example",
     ip: "10.20.10.31",
     customerFacing: true,
     baseline: { latencyMs: 120, rps: 620, errorRate: 0.003, cpu: 34, memory: 48 },
@@ -101,7 +101,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Platform Engineering",
     version: "5.1.0",
     regions: ["us-east-1", "eu-west-1"],
-    hostname: "api-01.internal.meridian.example",
+    hostname: "api-01.internal.vantimere.example",
     ip: "10.20.12.44",
     customerFacing: true,
     baseline: { latencyMs: 68, rps: 1450, errorRate: 0.004, cpu: 41, memory: 52 },
@@ -119,7 +119,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Security Engineering",
     version: "3.9.2",
     regions: ["us-east-1"],
-    hostname: "auth-01.internal.meridian.example",
+    hostname: "auth-01.internal.vantimere.example",
     ip: "10.20.12.51",
     customerFacing: true,
     baseline: { latencyMs: 42, rps: 380, errorRate: 0.002, cpu: 28, memory: 44 },
@@ -137,7 +137,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Product Engineering",
     version: "6.4.1",
     regions: ["us-east-1", "eu-west-1"],
-    hostname: "cust-01.internal.meridian.example",
+    hostname: "cust-01.internal.vantimere.example",
     ip: "10.20.12.60",
     customerFacing: true,
     baseline: { latencyMs: 86, rps: 540, errorRate: 0.005, cpu: 37, memory: 56 },
@@ -155,7 +155,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Commerce",
     version: "2.7.8",
     regions: ["us-east-1"],
-    hostname: "pay-01.internal.meridian.example",
+    hostname: "pay-01.internal.vantimere.example",
     ip: "10.20.12.72",
     customerFacing: true,
     baseline: { latencyMs: 210, rps: 95, errorRate: 0.006, cpu: 24, memory: 41 },
@@ -173,7 +173,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Product Engineering",
     version: "3.14.1",
     regions: ["us-east-1", "eu-west-1"],
-    hostname: "media-01.internal.meridian.example",
+    hostname: "media-01.internal.vantimere.example",
     ip: "10.20.12.85",
     customerFacing: true,
     baseline: { latencyMs: 145, rps: 310, errorRate: 0.004, cpu: 45, memory: 62 },
@@ -190,7 +190,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Platform Engineering",
     version: "1.8.3",
     regions: ["us-east-1"],
-    hostname: "int-01.internal.meridian.example",
+    hostname: "int-01.internal.vantimere.example",
     ip: "10.20.12.90",
     customerFacing: false,
     baseline: { latencyMs: 55, rps: 180, errorRate: 0.003, cpu: 22, memory: 38 },
@@ -208,7 +208,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Platform Engineering",
     version: "2.2.0",
     regions: ["us-east-1"],
-    hostname: "worker-03.internal.meridian.example",
+    hostname: "worker-03.internal.vantimere.example",
     ip: "10.20.20.14",
     customerFacing: false,
     baseline: { latencyMs: 320, rps: 60, errorRate: 0.008, cpu: 19, memory: 35, queueDepth: 40 },
@@ -225,7 +225,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Platform Infrastructure",
     version: "rabbitmq-3.13.4",
     regions: ["us-east-1"],
-    hostname: "mq-01.internal.meridian.example",
+    hostname: "mq-01.internal.vantimere.example",
     ip: "10.20.20.30",
     customerFacing: false,
     baseline: { latencyMs: 6, rps: 780, errorRate: 0.0005, cpu: 26, memory: 47, queueDepth: 120 },
@@ -242,7 +242,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Platform Infrastructure",
     version: "redis-7.2.5",
     regions: ["us-east-1"],
-    hostname: "cache-01.internal.meridian.example",
+    hostname: "cache-01.internal.vantimere.example",
     ip: "10.20.30.11",
     customerFacing: false,
     baseline: { latencyMs: 1.2, rps: 4200, errorRate: 0.0003, cpu: 31, memory: 58, cacheHitRate: 0.94 },
@@ -259,7 +259,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Data Platform",
     version: "postgres-16.3",
     regions: ["us-east-1"],
-    hostname: "pg-primary-01.internal.meridian.example",
+    hostname: "pg-primary-01.internal.vantimere.example",
     ip: "10.20.30.21",
     customerFacing: false,
     baseline: {
@@ -286,7 +286,7 @@ export const SERVICES: ServiceDef[] = [
     team: "Data Platform",
     version: "1.4.7",
     regions: ["us-east-1"],
-    hostname: "analytics-01.internal.meridian.example",
+    hostname: "analytics-01.internal.vantimere.example",
     ip: "10.20.40.12",
     customerFacing: false,
     baseline: { latencyMs: 480, rps: 40, errorRate: 0.01, cpu: 52, memory: 68, queueDepth: 300 },
@@ -411,7 +411,7 @@ export const API_ENDPOINTS: ApiEndpointDef[] = [
     service: "media-service",
     description: "Signed asset URLs and transcoding status.",
     trafficShare: 0.21,
-    samplePayload: `{\n  "data": [\n    { "id": "med_91b", "url": "https://cdn.meridian.example/…", "state": "ready" }\n  ]\n}`,
+    samplePayload: `{\n  "data": [\n    { "id": "med_91b", "url": "https://cdn.vantimere.example/…", "state": "ready" }\n  ]\n}`,
   },
   {
     id: "post-payments",
@@ -447,7 +447,7 @@ export const API_ENDPOINTS: ApiEndpointDef[] = [
 // ---------------------------------------------------------------------------
 
 /**
- * Service-discovery names: `<service-id>.internal.meridian.example` resolves to that
+ * Service-discovery names: `<service-id>.internal.vantimere.example` resolves to that
  * service. Generated rather than listed so the names logs refer to are always
  * the names the diagnostic tools can resolve — an operator who reads a hostname
  * in a log line must be able to paste it straight into `dig`.
@@ -459,23 +459,23 @@ const DISCOVERY_HOSTS: Record<string, ServiceId> = Object.fromEntries(
 export const NETWORK_HOSTS: Record<string, ServiceId> = {
   ...DISCOVERY_HOSTS,
   "api.internal": "api-gateway",
-  "api-01.internal.meridian.example": "api-gateway",
+  "api-01.internal.vantimere.example": "api-gateway",
   "auth.internal": "identity-service",
-  "auth-01.internal.meridian.example": "identity-service",
+  "auth-01.internal.vantimere.example": "identity-service",
   "db.internal": "primary-db",
-  "pg-primary-01.internal.meridian.example": "primary-db",
+  "pg-primary-01.internal.vantimere.example": "primary-db",
   "cache.internal": "redis-cache",
-  "cache-01.internal.meridian.example": "redis-cache",
+  "cache-01.internal.vantimere.example": "redis-cache",
   "media.internal": "media-service",
-  "media-01.internal.meridian.example": "media-service",
+  "media-01.internal.vantimere.example": "media-service",
   "pay.internal": "payment-service",
   "mq.internal": "message-queue",
   "web.internal": "web-frontend",
   "lb.internal": "load-balancer",
-  "cdn.meridian.example": "edge-cdn",
-  "meridian.example": "load-balancer",
-  "www.meridian.example": "load-balancer",
-  "ns1.internal.meridian.example": "dns-resolver",
+  "cdn.vantimere.example": "edge-cdn",
+  "vantimere.example": "load-balancer",
+  "www.vantimere.example": "load-balancer",
+  "ns1.internal.vantimere.example": "dns-resolver",
 };
 
 export const NETWORK_REGIONS = [

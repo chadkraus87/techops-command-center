@@ -179,7 +179,7 @@ export const paymentProviderOutage: Scenario = {
   requiredRemediationIds: ["failover-payment-provider"],
 
   rootCause:
-    "The upstream processor, Paycrest, suffered a regional outage and stopped answering charge requests, returning 503s and then nothing at all. Every Meridian-operated service remained healthy throughout — the failure was entirely outside the perimeter, surfacing only through the one service that depends on it.",
+    "The upstream processor, Paycrest, suffered a regional outage and stopped answering charge requests, returning 503s and then nothing at all. Every Vantimere-operated service remained healthy throughout — the failure was entirely outside the perimeter, surfacing only through the one service that depends on it.",
   resolution:
     "Charges were failed over to the secondary processor and the retry queue replayed against it with the original idempotency keys, so no customer was double-charged. Deferred receipts were delivered once confirmations arrived. Follow-up: shorten the provider timeout from 30s to 8s so failures surface before the customer gives up.",
 

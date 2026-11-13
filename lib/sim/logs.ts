@@ -135,13 +135,13 @@ const BASELINE_TEMPLATES: BaselineTemplate[] = [
   {
     service: "dns-resolver",
     level: "DEBUG",
-    message: "resolved customer-api.internal.meridian.example → 10.20.12.60 in {ms}ms",
+    message: "resolved customer-api.internal.vantimere.example → 10.20.12.60 in {ms}ms",
     weight: 8,
   },
   {
     service: "message-queue",
     level: "DEBUG",
-    message: "published event.usage.recorded to exchange meridian.events",
+    message: "published event.usage.recorded to exchange vantimere.events",
     weight: 6,
   },
   {

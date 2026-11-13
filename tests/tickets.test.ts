@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { SCENARIOS } from "@/lib/sim/scenarios";
-import { generateTickets, meridianTriageHref, MERIDIAN_TRIAGE_URL } from "@/lib/sim/tickets";
+import { generateTickets, switchboardHref, SWITCHBOARD_URL } from "@/lib/sim/tickets";
 
-describe("scenario tickets and the Meridian Triage link", () => {
+describe("scenario tickets and the Switchboard link", () => {
   const dns = SCENARIOS.find((s) => s.id === "dns-failure")!;
 
   // A busy incident a few minutes in, so several tickets arrive.
@@ -27,7 +27,7 @@ describe("scenario tickets and the Meridian Triage link", () => {
   });
 
   it("links to the recorded triage with a 1-based template number", () => {
-    expect(meridianTriageHref({ scenarioId: "dns-failure", templateIndex: 0 })).toBe(`${MERIDIAN_TRIAGE_URL}/techops/dns-failure/1`);
+    expect(switchboardHref({ scenarioId: "dns-failure", templateIndex: 0 })).toBe(`${SWITCHBOARD_URL}/techops/dns-failure/1`);
   });
 
   it("leaves background tickets without a source", () => {

@@ -76,7 +76,7 @@ export function HeroStatus() {
             <div className="flex items-center gap-2">
               <Beacon status={heroStatus} className="h-2 w-2" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-4">
-                Meridian Cloud · Production · us-east-1
+                Vantimere Cloud · Production · us-east-1
               </span>
             </div>
 
