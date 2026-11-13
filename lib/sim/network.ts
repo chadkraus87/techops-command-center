@@ -207,8 +207,8 @@ export function runTraceroute(state: SimState, target: string, tick: number): Te
   const def = getService(resolved.service);
   const subnet = resolved.ip.split(".").slice(0, 3).join(".");
   const hops = [
-    { label: "edge-rtr-01.internal.meridian.io", ip: GATEWAY_IP },
-    { label: `core-sw-02.internal.meridian.io`, ip: "10.20.0.2" },
+    { label: "edge-rtr-01.internal.meridian.example", ip: GATEWAY_IP },
+    { label: `core-sw-02.internal.meridian.example`, ip: "10.20.0.2" },
     { label: `${subnet}.1`, ip: `${subnet}.1` },
     { label: def.hostname, ip: resolved.ip },
   ];

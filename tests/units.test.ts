@@ -447,7 +447,7 @@ describe("network tools", () => {
   it("resolves hostnames, aliases and IPs to the right service", () => {
     expect(resolveTarget("api.internal")?.service).toBe("api-gateway");
     expect(resolveTarget("10.20.30.21")?.service).toBe("primary-db");
-    expect(resolveTarget("pg-primary-01.internal.meridian.io")?.service).toBe("primary-db");
+    expect(resolveTarget("pg-primary-01.internal.meridian.example")?.service).toBe("primary-db");
     expect(resolveTarget("nope.invalid")).toBeNull();
   });
 
@@ -472,7 +472,7 @@ describe("network tools", () => {
 
   it("answers a healthy lookup with an answer section", () => {
     const state = createInitialState(EPOCH);
-    const result = executeCommand("dig customer-api.internal.meridian.io", state, 1);
+    const result = executeCommand("dig customer-api.internal.meridian.example", state, 1);
     expect(result.lines.some((l) => l.text.includes("ANSWER SECTION"))).toBe(true);
     expect(result.lines.some((l) => l.text.includes("10.20.12.60"))).toBe(true);
   });

@@ -135,7 +135,7 @@ const BASELINE_TEMPLATES: BaselineTemplate[] = [
   {
     service: "dns-resolver",
     level: "DEBUG",
-    message: "resolved customer-api.internal.meridian.io → 10.20.12.60 in {ms}ms",
+    message: "resolved customer-api.internal.meridian.example → 10.20.12.60 in {ms}ms",
     weight: 8,
   },
   {

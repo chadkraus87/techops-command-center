@@ -35,7 +35,7 @@ import type { TerminalLine } from "@/lib/sim/types";
 
 const SUGGESTED = [
   "ping api.internal",
-  "dig customer-api.internal.meridian.io",
+  "dig customer-api.internal.meridian.example",
   "traceroute db.internal",
   "nc cache.internal 6379",
   "curl api.internal",
