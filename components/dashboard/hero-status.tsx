@@ -112,7 +112,7 @@ export function HeroStatus() {
             ) : (
               <Link
                 href="/simulation"
-                className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3.5 py-2 text-[13px] font-medium text-white shadow-[0_1px_0_0_rgba(255,255,255,0.14)_inset,0_4px_12px_-4px_rgba(91,140,255,0.6)] transition-all hover:bg-[#6d99ff] active:translate-y-px"
+                className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3.5 py-2 text-[13px] font-medium text-accent-ink transition-all hover:bg-accent-hover active:translate-y-px"
               >
                 <Zap size={14} />
                 Start incident simulation

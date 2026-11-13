@@ -64,7 +64,7 @@ export function IncidentTimeline({
       {/* The rail */}
       <span
         aria-hidden="true"
-        className="absolute bottom-3 left-[26px] top-3 w-px bg-line"
+        className="absolute bottom-3 left-[82px] top-3 w-px bg-line"
       />
 
       {events.map((event, index) => {
@@ -84,9 +84,12 @@ export function IncidentTimeline({
               isLast && "anim-fade-up",
             )}
           >
+            <span className="tabnum mt-[3px] w-[44px] shrink-0 text-right font-mono text-[11px] font-medium text-ink-2">
+              T+{formatOffset(offsetSeconds)}
+            </span>
             <span
               className={cx(
-                "relative z-10 mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
+                "relative z-10 mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border",
                 meta.tone,
               )}
             >
@@ -96,9 +99,9 @@ export function IncidentTimeline({
             <div className="min-w-0 flex-1 pb-0.5">
               <p className="text-[12.5px] leading-snug text-ink-2">{event.message}</p>
               <p className="tabnum mt-0.5 font-mono text-[10px] text-ink-4">
-                {formatTime(event.timestamp)}
+                <span className="uppercase tracking-[0.1em]">{meta.label}</span>
                 <span className="mx-1.5 text-ink-4">·</span>
-                T+{formatOffset(offsetSeconds)}
+                {formatTime(event.timestamp)}
                 {event.actor ? (
                   <>
                     <span className="mx-1.5 text-ink-4">·</span>

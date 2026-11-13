@@ -68,8 +68,8 @@ export function Sidebar({
       >
         {/* Brand */}
         <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-line px-4">
-          <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-accent to-accent-2 shadow-[0_2px_8px_-2px_rgba(91,140,255,0.6)]">
-            <svg viewBox="0 0 16 16" className="h-4 w-4 text-white" aria-hidden="true">
+          <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-accent/40 bg-accent-dim">
+            <svg viewBox="0 0 16 16" className="h-4 w-4 text-accent" aria-hidden="true">
               <path
                 d="M2 11.5 L5.2 11.5 L6.6 7.2 L8.4 13 L10 9.4 L11.2 11.5 L14 11.5"
                 fill="none"

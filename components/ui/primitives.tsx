@@ -48,7 +48,7 @@ export function PanelHeader({ title, subtitle, actions, meta, className }: Panel
     >
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <h2 className="truncate text-[13px] font-semibold tracking-tight text-ink">{title}</h2>
+          <h2 className="truncate font-mono text-[11.5px] font-medium uppercase tracking-[0.12em] text-ink">{title}</h2>
           {meta ? <span className="tabnum text-[11px] text-ink-3">{meta}</span> : null}
         </div>
         {subtitle ? <p className="mt-0.5 text-[12px] leading-snug text-ink-3">{subtitle}</p> : null}
@@ -66,7 +66,7 @@ export function SectionLabel({ children, className }: { children: ReactNode; cla
   return (
     <span
       className={cx(
-        "text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-4",
+        "font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-ink-4",
         className,
       )}
     >
@@ -117,7 +117,7 @@ export function StatusBadge({ status, size = "sm", className }: StatusBadgeProps
   return (
     <span
       className={cx(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-medium",
+        "inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 font-mono font-medium uppercase tracking-[0.06em]",
         size === "md" ? "text-[12px]" : "text-[11px]",
         STATUS_TEXT_CLASS[status],
         status === "healthy" && "border-ok/25 bg-ok/8",
@@ -186,7 +186,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         size === "md" && "h-8 px-3 text-[13px]",
         size === "lg" && "h-10 px-4 text-[14px]",
         variant === "primary" &&
-          "bg-accent text-white shadow-[0_1px_0_0_rgba(255,255,255,0.14)_inset,0_2px_8px_-2px_rgba(91,140,255,0.5)] hover:bg-[#6d99ff] disabled:hover:bg-accent",
+          "bg-accent text-accent-ink hover:bg-accent-hover disabled:hover:bg-accent",
         variant === "secondary" &&
           "border border-line bg-surface-3 text-ink hover:border-line hover:bg-surface-4",
         variant === "ghost" && "text-ink-2 hover:bg-surface-3 hover:text-ink",

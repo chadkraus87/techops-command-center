@@ -51,7 +51,7 @@ function ResultContent() {
             action={
               <Link
                 href="/simulation"
-                className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3.5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[#6d99ff]"
+                className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3.5 py-2 text-[13px] font-medium text-accent-ink transition-colors hover:bg-accent-hover"
               >
                 <Zap size={13} />
                 Open Simulation Center
@@ -155,7 +155,7 @@ function ResultContent() {
             onClick={() => {
               if (!hasActive) triggerScenario(scenario.id);
             }}
-            className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3.5 py-2 text-[13px] font-medium text-white shadow-[0_1px_0_0_rgba(255,255,255,0.14)_inset,0_4px_12px_-4px_rgba(91,140,255,0.6)] transition-colors hover:bg-[#6d99ff]"
+            className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3.5 py-2 text-[13px] font-medium text-accent-ink transition-colors hover:bg-accent-hover"
           >
             <Zap size={13} />
             {hasActive ? "Go to Simulation Center" : "Beat this score"}

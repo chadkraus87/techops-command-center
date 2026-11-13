@@ -80,7 +80,7 @@ function IncidentsContent() {
             action={
               <Link
                 href="/simulation"
-                className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3.5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[#6d99ff]"
+                className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3.5 py-2 text-[13px] font-medium text-accent-ink transition-colors hover:bg-accent-hover"
               >
                 Open Simulation Center
               </Link>

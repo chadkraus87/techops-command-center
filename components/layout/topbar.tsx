@@ -141,7 +141,7 @@ export function Topbar({
         </Tooltip>
 
         <ToggleGroup
-          className="hidden md:inline-flex"
+          className="max-md:hidden"
           label="Simulation speed"
           value={speed}
           onChange={(value) => setSpeed(value as SimSpeed)}
@@ -205,7 +205,7 @@ export function Topbar({
         ) : (
           <Link
             href="/simulation"
-            className="ml-1 hidden items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-[12px] font-medium text-white shadow-[0_1px_0_0_rgba(255,255,255,0.14)_inset,0_2px_8px_-2px_rgba(91,140,255,0.5)] transition-colors hover:bg-[#6d99ff] sm:inline-flex"
+            className="ml-1 hidden items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-[12px] font-medium text-accent-ink transition-colors hover:bg-accent-hover sm:inline-flex"
           >
             <Zap size={13} />
             Start Incident

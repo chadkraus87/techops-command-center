@@ -2,51 +2,52 @@
 
 /* ============================================================================
    TechOps Command Center — Design tokens
-   A single dark "operations centre" theme. Deep, cool, low-chroma surfaces so
-   that status colour is the only saturated thing on screen and therefore reads
-   instantly. All tokens are exposed to Tailwind via @theme.
+   "Mission control": a graphite console with phosphor status lights. Surfaces
+   and the accent are neutral, so status colour is the only saturated thing on
+   screen and reads instantly. Panels are squared bezels with corner marks;
+   labels are typed in mono like an instrument faceplate. All tokens are
+   exposed to Tailwind via @theme. Contrast is checked by tests/contrast.test.ts.
    ========================================================================= */
 
 @theme {
-  /* --- Surfaces -------------------------------------------------------- */
-  --color-void: #05070b; /* page background */
-  --color-surface: #0a0d14; /* default panel */
-  --color-surface-2: #0e121b; /* raised panel / header */
-  --color-surface-3: #141926; /* input, hover, active row */
-  --color-surface-4: #1b2130; /* pressed / selected */
+  /* --- Surfaces: graphite console, no blue cast ------------------------ */
+  --color-void: #08090a; /* page background */
+  --color-surface: #0d0f10; /* default panel */
+  --color-surface-2: #121416; /* raised panel / header */
+  --color-surface-3: #181b1d; /* input, hover, active row */
+  --color-surface-4: #202427; /* pressed / selected */
 
   /* --- Lines ----------------------------------------------------------- */
-  --color-line: #1a2030;
-  --color-line-soft: #141926;
-  --color-line-strong: #27304400;
+  --color-line: #23282b;
+  --color-line-soft: #181b1d;
+  --color-line-strong: #343a3e;
 
   /* --- Ink ------------------------------------------------------------- */
-  --color-ink: #e7ecf5;
-  --color-ink-2: #a3aec4;
-  --color-ink-3: #6b7793;
-  /* Lifted from #48536b, which measured 2.43:1 on a panel — below even the
-     3:1 large-text floor. This clears 4.5:1 on the void and panel surfaces and
-     4.39:1 on the lightest raised surface. */
-  --color-ink-4: #7a869e;
+  --color-ink: #ebe9e3;
+  --color-ink-2: #b3b5b0;
+  --color-ink-3: #8f938e;
+  --color-ink-4: #888c87;
 
-  /* --- Status (reserved — never used as a categorical series) ---------- */
-  --color-ok: #34d399;
-  --color-warn: #fbbf43;
-  --color-crit: #ff5b65;
-  --color-idle: #8b98b0;
-  --color-info: #38bdf8;
+  /* --- Status: phosphor annunciator lights (reserved, never a series) -- */
+  --color-ok: #3ddc84;
+  --color-warn: #ffb02e;
+  --color-crit: #ff5f56;
+  --color-idle: #9aa09a;
+  --color-info: #62c6e6;
 
   /* Dim variants for fills / backgrounds */
-  --color-ok-dim: #0d2b22;
-  --color-warn-dim: #302410;
-  --color-crit-dim: #331319;
-  --color-info-dim: #0c2333;
-  --color-idle-dim: #1a1f2b;
+  --color-ok-dim: #0c2a1b;
+  --color-warn-dim: #2e2210;
+  --color-crit-dim: #321514;
+  --color-info-dim: #0d2530;
+  --color-idle-dim: #1b1e21;
 
-  /* --- Brand accent ---------------------------------------------------- */
-  --color-accent: #5b8cff;
-  --color-accent-2: #7c5cff;
-  --color-accent-dim: #131b33;
+  /* --- Accent: console white. Status lights are the only colour. ------- */
+  --color-accent: #ece6d6;
+  --color-accent-2: #bdb6a3;
+  --color-accent-dim: #1e1d19;
+  --color-accent-ink: #0b0c0d; /* text on an accent fill */
+  --color-accent-hover: #fffaf0;
 
   /* --- Categorical series (validated, dark surface #0A0D14) ------------ */
   --color-series-1: #3987e5;
@@ -70,7 +71,13 @@
   --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
 
   /* --- Radius ---------------------------------------------------------- */
-  --radius-panel: 10px;
+  /* Squared-off bezels: instruments, not cards. */
+  --radius-panel: 3px;
+  --radius: 2px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 3px;
+  --radius-xl: 4px;
 }
 
 /* ============================================================================
@@ -101,8 +108,8 @@
   --color-ink: #0f1520;
   --color-ink-2: #384254;
   --color-ink-3: #5b6577;
-  /* 4.91:1 on white — the light twin of the dark fix above. */
-  --color-ink-4: #697181;
+  /* Clears 4.5:1 on white and on the hover surface. */
+  --color-ink-4: #626a79;
 
   /* Darkened so they carry the same weight on white that the originals do on
      near-black. Each still passes 3:1 against its own surface. */
@@ -118,9 +125,11 @@
   --color-info-dim: #e6f1fb;
   --color-idle-dim: #eef1f5;
 
-  --color-accent: #2f5fe0;
-  --color-accent-2: #6244d6;
-  --color-accent-dim: #e8eefc;
+  --color-accent: #1f2328;
+  --color-accent-2: #4a4f57;
+  --color-accent-dim: #e9eaec;
+  --color-accent-ink: #ffffff;
+  --color-accent-hover: #3a3f46;
 
   /* The validated light column of the categorical palette. */
   --color-series-1: #2a78d6;
@@ -193,8 +202,8 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(to right, rgba(120, 145, 200, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(120, 145, 200, 0.045) 1px, transparent 1px);
+    linear-gradient(to right, rgba(160, 170, 160, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(160, 170, 160, 0.04) 1px, transparent 1px);
   background-size: 44px 44px;
   mask-image: radial-gradient(ellipse 120% 80% at 50% 0%, #000 0%, transparent 75%);
 }
@@ -233,7 +242,7 @@ body::before {
   background-clip: content-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2b3348;
+  background: #2c3236;
   background-clip: content-box;
 }
 
@@ -244,13 +253,23 @@ body::before {
    ========================================================================= */
 
 .panel {
-  background: linear-gradient(180deg, var(--color-surface-2) 0%, var(--color-surface) 100%);
+  --tick: #4b5256;
+  /* Corner marks, drawn as backgrounds so .panel never needs position. */
+  background:
+    linear-gradient(var(--tick), var(--tick)) top left / 10px 1px no-repeat,
+    linear-gradient(var(--tick), var(--tick)) top left / 1px 10px no-repeat,
+    linear-gradient(var(--tick), var(--tick)) top right / 10px 1px no-repeat,
+    linear-gradient(var(--tick), var(--tick)) top right / 1px 10px no-repeat,
+    linear-gradient(var(--tick), var(--tick)) bottom left / 10px 1px no-repeat,
+    linear-gradient(var(--tick), var(--tick)) bottom left / 1px 10px no-repeat,
+    linear-gradient(var(--tick), var(--tick)) bottom right / 10px 1px no-repeat,
+    linear-gradient(var(--tick), var(--tick)) bottom right / 1px 10px no-repeat,
+    linear-gradient(180deg, var(--color-surface-2) 0%, var(--color-surface) 100%);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-panel);
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.035),
-    0 1px 2px rgba(0, 0, 0, 0.4),
-    0 8px 24px -12px rgba(0, 0, 0, 0.6);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.03),
+    0 1px 2px rgba(0, 0, 0, 0.5);
   /*
     Panels are almost always grid or flex children, and both default to
     `min-width: auto` — meaning the track sizes to the panel's min-content
