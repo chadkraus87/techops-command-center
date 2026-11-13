@@ -610,6 +610,7 @@ export function tick(state: SimState, dtSeconds = 1): TickResult {
     elapsedSeconds: working.active?.elapsed ?? 0,
     templates: scenario?.ticketTemplates ?? [],
     incidentId: working.active?.incidentId,
+    scenarioId: scenario?.id,
   });
   if (newTickets.length > 0) {
     working.tickets = [...newTickets, ...working.tickets].slice(0, MAX_TICKETS);

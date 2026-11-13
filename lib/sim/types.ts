@@ -287,6 +287,8 @@ export interface SupportTicket {
   /** Troubleshooting hints an experienced agent would attach. */
   suggestedSteps: string[];
   internalNotes: string[];
+  /** Which scenario template produced this ticket. Absent for background tickets. */
+  source?: { scenarioId: ScenarioId; templateIndex: number };
 }
 
 // ---------------------------------------------------------------------------

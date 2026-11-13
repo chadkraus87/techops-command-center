@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Inbox } from "lucide-react";
 import { cx, formatDateTime, formatRelative } from "@/lib/format";
-import { priorityLabel } from "@/lib/sim/tickets";
+import { meridianTriageHref, priorityLabel } from "@/lib/sim/tickets";
 import { serviceName } from "@/lib/sim/services";
 import { useSimStore } from "@/lib/store/sim-store";
 import { Drawer } from "@/components/ui/overlay";
@@ -329,6 +329,22 @@ function TicketDetail({
           ))}
         </ol>
       </section>
+
+      {ticket.source ? (
+        <section>
+          <SectionLabel className="mb-1.5 block">AI triage</SectionLabel>
+          <a
+            href={meridianTriageHref(ticket.source)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-3/40 px-3 py-2 text-[12px] text-ink-2 transition-colors hover:border-accent/50 hover:text-ink"
+          >
+            See how Meridian Triage handles this ticket
+            <span aria-hidden="true">↗</span>
+            <span className="sr-only">(opens in a new tab)</span>
+          </a>
+        </section>
+      ) : null}
 
       <section>
         <SectionLabel className="mb-1.5 block">Internal notes</SectionLabel>

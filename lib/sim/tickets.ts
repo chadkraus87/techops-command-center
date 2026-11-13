@@ -1,5 +1,5 @@
 import { hexId, noiseAt, pick } from "./random";
-import type { ScenarioTicketTemplate, SupportTicket, TicketPriority } from "./types";
+import type { ScenarioId, ScenarioTicketTemplate, SupportTicket, TicketPriority } from "./types";
 
 /**
  * Support ticket generation.
@@ -13,7 +13,7 @@ import type { ScenarioTicketTemplate, SupportTicket, TicketPriority } from "./ty
 
 export const MAX_TICKETS = 80;
 
-const CUSTOMERS = [
+export const CUSTOMERS = [
   { name: "Alicia Moreau", company: "Northwind Retail" },
   { name: "Ben Tanaka", company: "Fielding Logistics" },
   { name: "Chloé Dubois", company: "Aster Health" },
@@ -73,11 +73,19 @@ export interface TicketGenerationInput {
   elapsedSeconds: number;
   templates: ScenarioTicketTemplate[];
   incidentId?: string;
+  scenarioId?: ScenarioId;
+}
+
+/** Meridian Triage, the AI triage agent for the same fictional company, replays a recorded triage of every scenario ticket. */
+export const MERIDIAN_TRIAGE_URL = "https://meridian-triage.vercel.app";
+
+export function meridianTriageHref(source: NonNullable<SupportTicket["source"]>): string {
+  return `${MERIDIAN_TRIAGE_URL}/techops/${source.scenarioId}/${source.templateIndex + 1}`;
 }
 
 /** Generate zero or more tickets for this tick. Deterministic. */
 export function generateTickets(input: TicketGenerationInput): SupportTicket[] {
-  const { tick, clock, intensity, elapsedSeconds, templates, incidentId } = input;
+  const { tick, clock, intensity, elapsedSeconds, templates, incidentId, scenarioId } = input;
   const rate = ticketRateForTick(intensity, elapsedSeconds);
   if (rate <= 0 || templates.length === 0) return [];
 
@@ -109,6 +117,7 @@ export function generateTickets(input: TicketGenerationInput): SupportTicket[] {
         incidentId !== undefined
           ? [`Auto-linked to ${incidentId} by symptom correlation.`]
           : ["No active incident matched — triage individually."],
+      ...(scenarioId ? { source: { scenarioId, templateIndex: templates.indexOf(template) } } : {}),
     });
   }
   return tickets;
