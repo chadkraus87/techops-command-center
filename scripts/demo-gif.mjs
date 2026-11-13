@@ -42,6 +42,25 @@ function decode(buffer) {
   return { data: new Uint8ClampedArray(png.data), width: png.width, height: png.height };
 }
 
+/**
+ * Navigate on camera the way a visitor does, through the client router. A full
+ * reload would make the app show a "Session resumed" toast on every cut.
+ */
+async function go(page, path) {
+  const pushed = await page.evaluate((p) => {
+    if (typeof window.next?.router?.push !== "function") return false;
+    window.next.router.push(p);
+    return true;
+  }, path);
+  if (!pushed) return page.goto(`${BASE}${path}`, { waitUntil: "networkidle" });
+  await page.waitForURL((url) => url.pathname === path);
+  await page.waitForLoadState("networkidle");
+  // Clear the alert toasts from the previous beat so they don't cover this one.
+  await page.evaluate(() =>
+    document.querySelectorAll('button[aria-label="Dismiss notification"]').forEach((b) => b.click()),
+  );
+}
+
 async function main() {
   await mkdir(OUT, { recursive: true });
 
@@ -101,21 +120,21 @@ async function main() {
   await page.waitForTimeout(3000);
 
   // Beat 2: trigger the incident.
-  await page.goto(`${BASE}/simulation`, { waitUntil: "networkidle" });
+  await go(page, "/simulation");
   await page.waitForTimeout(800);
   await page.locator("button").filter({ hasText: /^Start simulation$/ }).first().click();
   await page.waitForTimeout(2500);
 
   // Beat 3: the overview turning red in real time — the money shot.
-  await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
+  await go(page, "/");
   await page.waitForTimeout(6000);
 
   // Beat 4: the blast radius, with the healthy data tier still green.
-  await page.goto(`${BASE}/infrastructure`, { waitUntil: "networkidle" });
+  await go(page, "/infrastructure");
   await page.waitForTimeout(4000);
 
   // Beat 5: the diagnostic contradiction.
-  await page.goto(`${BASE}/network`, { waitUntil: "networkidle" });
+  await go(page, "/network");
   for (const command of ["ping api.internal", "ping 10.20.12.44"]) {
     await page.fill("#terminal-input", command);
     await page.getByRole("button", { name: "Run" }).click();
@@ -123,7 +142,7 @@ async function main() {
   }
 
   // Beat 6: commit to the diagnosis.
-  await page.goto(`${BASE}/simulation`, { waitUntil: "networkidle" });
+  await go(page, "/simulation");
   await page.waitForTimeout(700);
   await page.getByRole("radio", { name: /DNS resolution failure/i }).click();
   await page.getByRole("button", { name: "Submit diagnosis" }).click();

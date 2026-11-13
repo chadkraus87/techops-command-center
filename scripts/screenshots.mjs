@@ -50,6 +50,11 @@ async function shot(page, name, path, waitMs = 1200) {
   if (path) await page.goto(`${BASE}${path}`, { waitUntil: "networkidle" });
   // Let charts settle and entrance animations finish before capturing.
   await page.waitForTimeout(waitMs);
+  // A "Session resumed" toast after navigation would cover part of the view.
+  for (const close of await page.getByRole("button", { name: "Dismiss notification" }).all()) {
+    await close.click().catch(() => {});
+  }
+  await page.waitForTimeout(300);
   await page.screenshot({ path: `${OUT}/${name}.png` });
   console.log(`captured ${name}.png`);
 }
