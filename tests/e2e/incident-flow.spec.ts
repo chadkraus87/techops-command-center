@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 /**
  * The journeys a visitor actually takes.
  *
- * These assert wiring, not simulation maths — the engine has 105 unit tests for
+ * These assert wiring, not simulation maths — the engine has 162 unit tests for
  * that. What is verified here is that the pieces are connected: routes resolve,
  * state reaches the screen, dialogs behave, and a full incident can be worked
  * from trigger to score without touching the console.

@@ -86,8 +86,9 @@ evidence that mattered.
 - **Operations knowledge** — SLO-derived alerting with evaluation windows,
   dependency cascades, tail-latency behaviour under saturation, and incident
   management workflow
-- **Testing** — 159 unit tests over a pure, deterministic simulation engine, plus
-  32 Playwright end-to-end tests across desktop, tablet and mobile
+- **Testing** — 162 unit tests over a pure, deterministic simulation engine, a
+  contrast check on every colour pair in both themes, plus 32 Playwright
+  end-to-end tests across desktop, tablet and mobile
 
 ---
 
@@ -375,16 +376,18 @@ Open <http://localhost:3000>.
 ### Testing
 
 ```bash
-npm test           # 159 unit tests over the simulation engine
+npm test           # 162 engine unit tests, plus the palette contrast checks
 npm run test:watch # watch mode
 npm run test:e2e   # 32 Playwright tests against a production build
 ```
 
-**Unit tests (Vitest, 159)** cover incident state transitions, metric ramp and
+**Unit tests (Vitest, 162)** cover incident state transitions, metric ramp and
 recovery curves, service health derivation, dependency cascade attenuation, alert
 evaluation windows, diagnosis and scoring, remediation gating, session
 persistence, guided-mode hints, shared-link encoding, incident replay, the
-network tools, and the determinism guarantee itself.
+network tools, and the determinism guarantee itself. A separate contrast test
+reads the colour tokens and checks every text and surface pair in both themes
+against WCAG AA.
 
 **End-to-end tests (Playwright, 32)** deliberately do *not* re-assert simulation
 behaviour — the unit tests own that. They cover the one thing unit tests cannot:
